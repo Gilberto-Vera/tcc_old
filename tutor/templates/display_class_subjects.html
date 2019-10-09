@@ -1,0 +1,22 @@
+  <table class="posts" border="1">
+<thead>
+<tr>
+    <th>Assunto</th>
+    <th>Assunto anterior</th>
+    <th>Assunto posterior</th>
+    <th>&nbsp;</th>
+</tr>
+</thead>
+  {% for row in cs %}
+    <tr>
+    	<td>{{ row.cs.title }}</td>
+        <td align="center">-</td>
+        <td align="center">-</td>
+        <td><a href="{{ url_for('open_questions', cs_title=row.cs.title, cc_title=row.cc.title) }}">Ver questões</a><br></td>
+    </tr>
+  {% else %}
+      <tr>
+    	<td colspan="3">Nenhum assunto para esta disciplina ainda!</td>
+    </tr>
+  {% endfor %}
+  </table>

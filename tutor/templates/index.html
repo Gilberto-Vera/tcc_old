@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+
+  {% if session.username %}
+    <h2>Olá, {{ 'Professor' if session.type == 'teacher' else 'Aluno' }}</h2>
+    <h3>Utilize os menus acima para executar funções</h3>
+  {% else %}
+    <h2>Olá, Visitante</h2>
+    <h3>Por favor, realize o login</h3>
+  {% endif %}
+
+{% endblock %}

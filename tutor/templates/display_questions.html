@@ -1,0 +1,23 @@
+  <table class="posts" border="1">
+<thead>
+<tr>
+    <th>Título</th>
+    <th>Nível de Dificuldade</th>
+    <th></th>
+    <th></th>
+</tr>
+</thead>
+
+  {% for row in q %}
+    <tr>
+    	<td>{{ row.q.title }}</td>
+        <td align="center">{{ row.q.difficulty }}</td>
+        <td><a href="{# url_for('open_questions', title=row.id) #}">Alterar questão</a></td>
+        <td><a href="url_for('delete_questions', title= row.id)">Excluir</a></td>
+    </tr>
+  {% else %}
+      <tr>
+    	<td colspan="4">Nenhuma questão para este assunto ainda!</td>
+    </tr>
+  {% endfor %}
+  </table>

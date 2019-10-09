@@ -1,0 +1,26 @@
+<!doctype html>
+<title>IF Tutor</title>
+<link rel="stylesheet" type="../static" href="{{ url_for('static', filename='style.css') }}">
+<div class="page">
+  <h1>Tutor Utilizando Base de Dados em Grafo</h1>
+  <div class="metanav">
+  {% if session.username %}
+  Logged in as {{ session.username }}
+  {% endif %}
+  <a href="{{ url_for('index') }}">Home</a>
+  {% if not session.username %}
+    <a href="{{ url_for('register') }}">Cadastrar</a>
+    <a href="{{ url_for('login') }}">Login</a>
+  {% else %}
+    <a href="{{ url_for('profile', username=session.username) }}">Perfil</a>
+    {% if session.type == 'teacher' %}
+        <a href="{{ url_for('open_course_class') }}">Disciplina</a>
+    {% endif %}
+    <a href="{{ url_for('logout') }}">Logout</a>
+  {% endif %}
+  </div>
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+  {% block body %}{% endblock %}
+</div>

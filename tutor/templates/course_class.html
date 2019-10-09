@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {% if session.username %}
+    <h2>Nova Disciplina</h2>
+    <form action="{{ url_for('create_course_class') }}" method="post">
+        <dl>
+            <dt>Título:</dt>
+            <dd><input type="text" size="30" name="title" required></dd>
+            <dd><input type="submit" value="Criar"></dd>
+        </dl>
+    </form>
+
+{# Opções para excluir Disciplina #}
+{#    <dl>#}
+{#    <form action="{{ url_for('delete_course_class') }}" method="POST">#}
+{#        <select name="course_class">#}
+{#            <option value="">-- Selecione uma Disciplina --</option>#}
+{#            {% for row in cc %}#}
+{#                <option value="{{ row.title }}">{{ row.title }}</option>#}
+{#            {% endfor %}#}
+{#            <input type="submit" value="Excluir">#}
+{#        </select>#}
+{#    </form>#}
+{#    </dl>#}
+{# Apresenta uma lista com todos as disciplinas #}
+
+    <table border="1" class="posts" name="course_class">
+        <thead>
+            <tr>
+                <td colspan="4" align="center">Disciplinas Existentes</td>
+            </tr>
+        </thead>
+
+        {% for row in cc %}
+            <tr>
+                <td>{{ row.title }}</td>
+                <td><a href="{{ url_for('open_class_subject', title=row.title) }}"> Ver Assuntos </a></td>
+                <td><a href=""> Alterar Disciplina </a></td>
+                <td><a href="{{ url_for('delete_course_class', title=row.title) }}"> Excluir Disciplina </a></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">Nenhuma disciplina cadastrada ainda!!!</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    {% endif %}
+
+{% endblock %}

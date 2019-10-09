@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {% if session.username %}
+    <h2>Novo Assunto - {{ cc }}</h2>
+    <form action="{{ url_for('create_class_subject') }}" method="post">
+        <dl>
+            <dt>Novo Assunto:</dt>
+            <dd><input type="text" size="30" name="subject_title"></dd>
+            <dt>Assunto anterior:</dt>
+            <dd>
+                <select name="previous_subject">
+                    <option value="">-- Nenhum assunto anterior --</option>
+                    {% for row in cs %}
+                        <option value="{{ row.cs.title }}">{{ row.cs.title }}</option>
+                    {% endfor %}
+                </select>
+            </dd>
+            <dt>Assunto posterior:</dt>
+            <dd>
+                <select name="next_subject">
+                    <option value="">-- Nenhum assunto posterior --</option>
+                    {% for row in cs %}
+                        <option value="{{ row.cs.title }}">{{ row.cs.title }}</option>
+                    {% endfor %}
+                </select>
+            </dd>
+            <input type="hidden" name="cc" value="{{ cc }}" />
+        </dl>
+        <input type="submit" value="Salvar">
+    </form>
+
+
+
+    <br/>
+    <h2>Assuntos Existentes</h2>
+    {% include 'display_class_subjects.html' %}
+
+    {% endif %}
+
+{% endblock %}
