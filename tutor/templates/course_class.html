@@ -7,8 +7,8 @@
         <dl>
             <dt>Título:</dt>
             <dd><input type="text" size="30" name="title" required></dd>
-            <dd><input type="submit" value="Criar"></dd>
         </dl>
+        <input type="submit" value="Criar">
     </form>
 
 {# Opções para excluir Disciplina #}
@@ -25,10 +25,13 @@
 {#    </dl>#}
 {# Apresenta uma lista com todos as disciplinas #}
 
+    <h2></h2>
     <table border="1" class="posts" name="course_class">
         <thead>
             <tr>
-                <td colspan="4" align="center">Disciplinas Existentes</td>
+                <caption><h3>Lista de Disciplinas</h3></caption>
+                <th align="center">Título</th>
+                <th colspan="3" align="center">Gerenciamento</th>
             </tr>
         </thead>
 
@@ -36,8 +39,8 @@
             <tr>
                 <td>{{ row.title }}</td>
                 <td><a href="{{ url_for('open_class_subject', title=row.title) }}"> Ver Assuntos </a></td>
-                <td><a href=""> Alterar Disciplina </a></td>
-                <td><a href="{{ url_for('delete_course_class', title=row.title) }}"> Excluir Disciplina </a></td>
+                <td><a href=""> Alterar </a></td>
+                <td><a href="{{ url_for('delete_course_class', title=row.title) }}"> Excluir </a></td>
             </tr>
             {% else %}
             <tr>

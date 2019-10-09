@@ -19,7 +19,7 @@
                 <dd><textarea name="choice_c" cols="67" rows="1"></textarea></dd>
             <dt>Alternativa D: <input type="radio" name="right_answer" value="d"><label>Resposta correta</label></dt>
                 <dd><textarea name="choice_d" cols="67" rows="1"></textarea></dd>
-            <dt>Nível de Dificuldade:</dt>
+            <dt>Nível de Dificuldade da questão:</dt>
             <dd>
                 <select name="difficulty">
                     <option value="1">1</option>
@@ -40,10 +40,6 @@
         <input type="submit" value="Salvar">
     </form>
 
-
-
-    <br/>
-    <h2>Questões existentes</h2>
     {% include 'display_questions.html' %}
 
     {% endif %}

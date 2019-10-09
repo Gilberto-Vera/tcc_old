@@ -1,10 +1,12 @@
-  <table class="posts" border="1">
+
+<h2></h2>
+<table class="posts" border="1">
 <thead>
 <tr>
+    <caption><h3>Lista de Questões</h3></caption>
     <th>Título</th>
-    <th>Nível de Dificuldade</th>
-    <th></th>
-    <th></th>
+    <th>Dificuldade</th>
+    <th colspan="3" align="center">Gerenciamento</th>
 </tr>
 </thead>
 
@@ -12,8 +14,9 @@
     <tr>
     	<td>{{ row.q.title }}</td>
         <td align="center">{{ row.q.difficulty }}</td>
-        <td><a href="{# url_for('open_questions', title=row.id) #}">Alterar questão</a></td>
-        <td><a href="url_for('delete_questions', title= row.id)">Excluir</a></td>
+        <td align="center"><a href="{# url_for('open_questions', title=row.id) #}">Ver questão</a></td>
+        <td align="center"><a href="{# url_for('open_questions', title=row.id) #}">Alterar</a></td>
+        <td align="center"><a href="url_for('delete_questions', title= row.id)">Excluir</a></td>
     </tr>
   {% else %}
       <tr>

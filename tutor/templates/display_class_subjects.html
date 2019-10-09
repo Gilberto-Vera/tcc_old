@@ -1,10 +1,13 @@
   <table class="posts" border="1">
+
+<h2></h2>
 <thead>
 <tr>
-    <th>Assunto</th>
-    <th>Assunto anterior</th>
-    <th>Assunto posterior</th>
-    <th>&nbsp;</th>
+    <caption><h3>Lista de Assuntos</h3></caption>
+    <th>Título</th>
+    <th>Anterior</th>
+    <th>Posterior</th>
+    <th colspan="3" >Gerenciamento</th>
 </tr>
 </thead>
   {% for row in cs %}
@@ -12,11 +15,13 @@
     	<td>{{ row.cs.title }}</td>
         <td align="center">-</td>
         <td align="center">-</td>
-        <td><a href="{{ url_for('open_questions', cs_title=row.cs.title, cc_title=row.cc.title) }}">Ver questões</a><br></td>
+        <td align="center"><a href="{{ url_for('open_questions', cs_title=row.cs.title, cc_title=row.cc.title) }}">Ver questões</a><br></td>
+        <td align="center"><a href="{# url_for('open_questions', title=row.id) #}">Alterar</a></td>
+        <td align="center"><a href="{#url_for('delete_questions', title= row.id)#}">Excluir</a></td>
     </tr>
   {% else %}
       <tr>
-    	<td colspan="3">Nenhum assunto para esta disciplina ainda!</td>
+    	<td colspan="3">Nenhum assunto cadastrado para esta disciplina ainda!</td>
     </tr>
   {% endfor %}
   </table>
