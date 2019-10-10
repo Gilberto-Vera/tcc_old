@@ -110,6 +110,15 @@ class CourseClass:
         else:
             return False
 
+    def edit(self, title, cc):
+        query = '''
+                    MATCH (cc:CourseClass {title: {cc}})
+                    SET cc.title = {title}
+                    RETURN cc
+                    '''
+        graph.run(query, title=title, cc=cc)
+        return True
+
     def delete(self, title):
         if self.find(title):
             cc = matcher.match("CourseClass", title__exact=title).first()
@@ -134,6 +143,20 @@ class ClassSubject:
         cc = graph.run(query, cc=cc, title=title)
         return cc
 
+    def find_previous(self, title, cc):
+        query = '''
+                match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:PREVIOUS]->(c:ClassSubject)
+                return c.title
+                '''
+        return graph.evaluate(query, title=title, cc=cc)
+
+    def find_next(self, title, cc):
+        query = '''
+                match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:FORWARD]->(c:ClassSubject)
+                return c.title
+                '''
+        return graph.evaluate(query, title=title, cc=cc)
+
     def create(self, course_class, title, ps, ns):
         if not self.find_in_course(course_class, title).evaluate():
             cc = CourseClass().find(course_class)
@@ -149,11 +172,11 @@ class ClassSubject:
 
             if ps:
                 previous_subject = self.find_in_course(course_class, ps).evaluate()
-                graph.merge(Relationship(previous_subject, 'PREVIOUS_TO', cs))
+                graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
 
             if ns:
                 next_subject = self.find_in_course(course_class, ns).evaluate()
-                graph.merge(Relationship(cs, 'FORWARD_TO', next_subject))
+                graph.merge(Relationship(cs, 'FORWARD', next_subject))
 
             return True
         else:
@@ -168,6 +191,13 @@ class ClassSubject:
             WHERE cc.title = {title}
             RETURN cs, cc
             '''
+
+        # MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
+        # OPTIONAL MATCH (cs)-[:FORWARD]->(ns:ClassSubject)
+        # OPTIONAL MATCH (cs)-[:PREVIOUS]->(ps:ClassSubject)
+        # RETURN cs,  ns.title, ps.title
+        # ORDER BY cs.order
+
         cc = graph.run(query, title=title)
         return cc
 
@@ -178,9 +208,8 @@ class ClassSubject:
                        MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
                        WHERE cc.title = {cc} AND cs.title = {title}
                        RETURN cs
-                       ORDER BY cs.order
                        '''
-            cs = graph.run(query, cc=cc, title=title)
+            cs = graph.evaluate(query, cc=cc, title=title)
             graph.delete(cs)
             return True
         else:

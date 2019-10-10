@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {% if session.username %}
+    <h2>Alterando a  Disciplina</h2>
+    <form action="{{ url_for('edit_course_class') }}" method="post">
+        <dl>
+            <dt>Título:</dt>
+            <dd><input type="text" size="30" name="title" value="{{ cc }}" required></dd>
+        </dl>
+        <input type="hidden" name="cc" value="{{ cc }}">
+        <input type="submit" value="Criar">
+    </form>
+
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {% if session.username %}
+    <h2>Alterando Assunto</h2>
+    <form action="{# url_for('edit_class_subject') #}" method="post">
+        <dl>
+            <dt>Assunto:</dt>
+            <dd><input type="text" size="30" name="subject_title" value="{{ title }}"></dd>
+            <dt>Assunto anterior:</dt>
+            <dd>
+                <select name="previous_subject">
+                    <option value="">-- Nenhum assunto anterior --</option>
+                    {% for row in cs %}
+                        <option value="{{ row.cs.title }}" {{ "selected" if row.cs.title == ps }}>{{ row.cs.title }}</option>
+                    {% endfor %}
+                </select>
+            </dd>
+            <dt>Assunto posterior:</dt>
+            <dd>
+                <select name="next_subject">
+                    <option value="">-- Nenhum assunto posterior --</option>
+                    {% for row in cs %}
+                        <option value="{{ row.cs.title }}" {{ "selected" if row.cs.title == ns }}>{{ row.cs.title }}</option>
+                    {% endfor %}
+                </select>
+            </dd>
+            <input type="hidden" name="cc" value="{{ cc }}" />
+            <input type="hidden" name="title" value="{{ title }}" />
+        </dl>
+        <input type="submit" value="Salvar">
+    </form>
+
+    {% endif %}
+
+{% endblock %}

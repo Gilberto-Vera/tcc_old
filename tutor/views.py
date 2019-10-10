@@ -64,7 +64,33 @@ def logout():
 
 
 # COURSE CLASS #
-@app.route('/open_course_class', methods=['GET', 'POST'])
+@app.route('/edit_course_class', methods=['GET', 'POST'])
+def edit_course_class():
+    check_if_teacher()
+
+    if request.method == 'POST':
+        cc = request.form['cc']
+        title = request.form['title']
+
+        if not CourseClass().edit(title, cc):
+            flash('Erro ao alterar Disciplina')
+        else:
+            flash('Disciplina alterada com sucesso.')
+
+    return redirect(url_for('open_course_class'))
+
+
+@app.route('/open_edit_course_class/<title>')
+def open_edit_course_class(title):
+    check_if_teacher()
+
+    return render_template(
+        'edit_course_class.html',
+        cc=title
+    )
+
+
+@app.route('/open_course_class')
 def open_course_class():
     check_if_teacher()
 
@@ -152,6 +178,41 @@ def delete_question(id):
     return redirect(request.referrer)
 
 # CLASS SUBJECT #
+@app.route('/edit_class_subject', methods=['GET', 'POST'])
+def edit_class_subject():
+    check_if_teacher()
+
+    if request.method == 'POST':
+        cc = request.form['cc']
+        title = request.form['title']
+
+        if not CourseClass().edit(title, cc):
+            flash('Erro ao alterar Disciplina')
+        else:
+            flash('Disciplina alterada com sucesso.')
+
+    return redirect(url_for('open_course_class'))
+
+
+@app.route('/open_edit_class_subject/<title>/<cc>')
+def open_edit_class_subject(title, cc):
+    check_if_teacher()
+
+    class_subjects = list(ClassSubject().get_class_subjects(cc))
+
+    ps = ClassSubject().find_previous(title, cc)
+    ns = ClassSubject().find_next(title, cc)
+
+    return render_template(
+        'edit_class_subject.html',
+        cc=cc,
+        title=title,
+        ps=ps,
+        ns=ns,
+        cs=class_subjects
+    )
+
+
 @app.route('/open_class_subject/<title>')
 def open_class_subject(title):
     check_if_teacher()
@@ -175,6 +236,7 @@ def delete_class_subject(cs_title, cc_title):
         flash('Assunto excluido com sucesso.')
 
     return redirect(request.referrer)
+
 
 @app.route('/create_class_subject', methods=['GET', 'POST'])
 def create_class_subject():
