@@ -101,7 +101,6 @@ def delete_course_class(title):
 
     return redirect(request.referrer)
 
-
 # QUESTIONS #
 @app.route('/open_questions/<cs_title>/<cc_title>')
 def open_questions(cs_title, cc_title):
@@ -142,10 +141,15 @@ def create_question():
     return redirect(request.referrer)
 
 
-@app.route('/delete_question/<id>', methods=['GET', 'POST'])
-def delete_question():
+@app.route('/delete_question/<id>')
+def delete_question(id):
     check_if_teacher()
+    if not Question().delete(id):
+        flash('Questão não encontrada')
+    else:
+        flash('Questão excluida com sucesso.')
 
+    return redirect(request.referrer)
 
 # CLASS SUBJECT #
 @app.route('/open_class_subject/<title>')
@@ -161,14 +165,16 @@ def open_class_subject(title):
     )
 
 
-@app.route('/remove_class_subject/<title>')
-def remove_class_subject(title):
+@app.route('/delete_class_subject/<cs_title>/<cc_title>')
+def delete_class_subject(cs_title, cc_title):
     check_if_teacher()
 
-    ClassSubject().remove_class_subject()
+    if not ClassSubject().delete(cs_title, cc_title):
+        flash('Assunto não encontrada')
+    else:
+        flash('Assunto excluido com sucesso.')
 
-    return render_template('open_class_subject.html')
-
+    return redirect(request.referrer)
 
 @app.route('/create_class_subject', methods=['GET', 'POST'])
 def create_class_subject():

@@ -171,9 +171,20 @@ class ClassSubject:
         cc = graph.run(query, title=title)
         return cc
 
-    def remove_class_subject(self):
-        #graph.delete()
-        return True
+    def delete(self, title, cc):
+
+        if self.find_in_course(title, cc):
+            query = '''
+                       MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                       WHERE cc.title = {cc} AND cs.title = {title}
+                       RETURN cs
+                       ORDER BY cs.order
+                       '''
+            cs = graph.run(query, cc=cc, title=title)
+            graph.delete(cs)
+            return True
+        else:
+            return False
 
 
 class Question:
@@ -215,6 +226,13 @@ class Question:
         question = graph.run(query, cs_title=cs_title, cc_title=cc_title)
         return question
 
+    def delete(self, id):
+        if self.find(id):
+            question = matcher.match("Question", id__exact=id).first()
+            graph.delete(question)
+            return True
+        else:
+            return False
 
 def get_todays_recent_posts():
     query = '''
