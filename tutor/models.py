@@ -131,7 +131,7 @@ class CourseClass:
         cc = matcher.match("CourseClass").order_by("_.title")
         return cc
 
-    # método que verifica se a disciplina não tem nenhum relacionamento
+    # método que verifica se a disciplina não tem nenhum relacionamento com outro assunto
     def find_single_course_class(self, cc):
         query = '''
                  match (cc:CourseClass {title: {cc}})
@@ -171,7 +171,6 @@ class ClassSubject:
             cc = CourseClass().find(course_class)
 
             # TODO ClassSubject TEM QUE TER UM ATRIBUTO QUE DEFINE SE É O NÓ INICIAL DA DISCIPLINA.
-            # TODO SE FOR O PRIMEIRO NÓ DE UMA DISCIPLINA, AUTOMATICAMENTE É DEFINIDO COMO NÓ INICIAL.
             # TODO POSTERIORMENTE, O USUÁRIO PODERÁ MUDAR QUAL O ASSUNTO (NÓ) INICIAL DE UMA DISCIPLINA.
 
             fscc= CourseClass().find_single_course_class(course_class)
