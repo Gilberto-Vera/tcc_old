@@ -23,8 +23,8 @@ def register():
 
         if len(username) < 1:
             flash('Nome de usuário deve possuir pelo menos 1 caractere')
-        elif len(password) < 5:
-            flash('Senha deve ter pelo menos 5 caracteres')
+        elif len(password) < 3:
+            flash('Senha deve ter pelo menos 3 caracteres')
         elif not Person(username).register(name, password, type):
             flash('Nome de usuário já existente')
         else:
@@ -151,6 +151,7 @@ def create_question():
         cc = request.form['cc']
         title = request.form['question_title']
         body = request.form['question_body']
+        support_material = request.form['support_material']
         difficulty = request.form['difficulty']
         choice_a = request.form['choice_a']
         choice_b = request.form['choice_b']
@@ -158,7 +159,7 @@ def create_question():
         choice_d = request.form['choice_d']
         right_answer = request.form['right_answer']
 
-        if not Question().create(cc, cs, title, body, difficulty, choice_a, choice_b, choice_c, choice_d, right_answer,
+        if not Question().create(cc, cs, title, body, support_material, difficulty, choice_a, choice_b, choice_c, choice_d, right_answer,
                                  session["username"]):
             flash('Erro ao cadastrar questão')
         else:
@@ -200,6 +201,8 @@ def open_edit_class_subject(title, cc):
 
     class_subjects = list(ClassSubject().get_class_subjects(cc))
 
+    cs = ClassSubject().find_in_course(cc, title)
+
     ps = ClassSubject().find_previous(title, cc)
     ns = ClassSubject().find_next(title, cc)
 
@@ -209,7 +212,8 @@ def open_edit_class_subject(title, cc):
         title=title,
         ps=ps,
         ns=ns,
-        cs=class_subjects
+        cs=class_subjects,
+        support_material=cs.evaluate()["support_material"]
     )
 
 
@@ -245,12 +249,13 @@ def create_class_subject():
     if request.method == 'POST':
         title = request.form['subject_title']
         cc = request.form['cc']
+        support_material = request.form['support_material']
         ps = request.form.get('previous_subject')
         ns = request.form.get('next_subject')
 
         if len(title) < 1:
             flash('O assunto deve possuir pelo menos 1 caractere')
-        elif not ClassSubject().create(cc, title, ps, ns):
+        elif not ClassSubject().create(cc, title, ps, ns, support_material):
             flash('Assunto já existente')
         else:
             flash('Assunto criado com sucesso.')

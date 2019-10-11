@@ -167,19 +167,16 @@ class ClassSubject:
                 '''
         return graph.evaluate(query, title=title, cc=cc)
 
-    def create(self, course_class, title, ps, ns):
+    def create(self, course_class, title, ps, ns, support_material):
         if not self.find_in_course(course_class, title).evaluate():
             cc = CourseClass().find(course_class)
 
-            # TODO ClassSubject TEM QUE TER UM ATRIBUTO QUE DEFINE SE É O NÓ INICIAL DA DISCIPLINA.
-            # TODO POSTERIORMENTE, O USUÁRIO PODERÁ MUDAR QUAL O ASSUNTO (NÓ) INICIAL DE UMA DISCIPLINA.
-
-            fscc= CourseClass().find_single_course_class(course_class)
+            fscc = CourseClass().find_single_course_class(course_class)
 
             if fscc:
-                cs = Node("ClassSubject", title=title, inicial=True)
+                cs = Node("ClassSubject", title=title, inicial=True, support_material=support_material)
             else:
-                cs = Node("ClassSubject", title=title, inicial=False)
+                cs = Node("ClassSubject", title=title, inicial=False, support_material=support_material)
 
             graph.create(cs)
 
@@ -239,7 +236,8 @@ class Question:
         question = matcher.match("Question", id__exact=id).first()
         return question
 
-    def create(self, cc, class_subject, title, body, difficulty, choice_a, choice_b, choice_c, choice_d, right_answer, user):
+    def create(self, cc, class_subject, title, body, support_material, difficulty, choice_a, choice_b, choice_c,
+               choice_d, right_answer, user):
         cs = ClassSubject().find_in_course(cc, class_subject).evaluate()
 
         question = Node(
@@ -247,6 +245,7 @@ class Question:
             id=str(uuid.uuid1()),
             title=title,
             body=body,
+            support_material=support_material,
             difficulty=difficulty,
             choice_a=choice_a,
             choice_b=choice_b,
