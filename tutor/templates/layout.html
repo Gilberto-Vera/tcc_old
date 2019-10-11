@@ -3,24 +3,24 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 <div class="page">
     <h1>IF tutor</h1>
-  {% if session.username %}
-      <p> Olá {{ session.person_name }} </p>
-  {% endif %}
     <h3>Tutor Utilizando Base de Dados em Grafo</h3>
-    <div class="metanav">
-    <a href="{{ url_for('index') }}">Página Inicial</a>
-  {% if not session.username %}
-    <a href="{{ url_for('register') }}">Cadastrar</a>
-    <a href="{{ url_for('login') }}">Entrar</a>
-  {% else %}
-    {% if session.type == 'teacher' %}
-        <a href="{{ url_for('open_course_class') }}">Disciplina</a>
+    {% if session.username %}
+        <p class="session"> Olá {{ session.person_name }}!! </p>
     {% endif %}
-    <a href="{{ url_for('logout') }}">Sair</a>
-  {% endif %}
-  </div>
-  {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-  {% block body %}{% endblock %}
+    <div class="metanav">
+        <a href="{{ url_for('index') }}" class="inicial">Página Inicial</a>
+        {% if not session.username %}
+            <a href="{{ url_for('register') }}">Cadastrar</a>
+            <a href="{{ url_for('login') }}">Entrar</a>
+        {% else %}
+            {% if session.type == 'teacher' %}
+                <a href="{{ url_for('open_course_class') }}">Disciplina</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}">Sair</a>
+        {% endif %}
+    </div>
+    {% for message in get_flashed_messages() %}
+        <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block body %}{% endblock %}
 </div>
