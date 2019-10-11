@@ -141,6 +141,7 @@ class CourseClass:
         cc = graph.evaluate(query, cc=cc)
         return cc
 
+
 class ClassSubject:
     def find_in_course(self, cc, title):
         query = '''
@@ -197,20 +198,23 @@ class ClassSubject:
             return False
 
     def get_class_subjects(self, title):
-
-        # TODO 1 - ORDER BY O QUÊ????? (OPCIONAL)
-        # TODO 2 - TEM QUE RETORNAR O TÍTULO DO ASSUNTO ANTERIOR E O TÍTULO DO ASSUNTO POSTERIOR, SE EXISTIREM
         query = '''
-            MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-            WHERE cc.title = {title}
-            RETURN cs, cc
-            '''
+                MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                WHERE cc.title = {title}
+                RETURN cs, cc
+                '''
 
-        # MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
-        # OPTIONAL MATCH (cs)-[:FORWARD]->(ns:ClassSubject)
-        # OPTIONAL MATCH (cs)-[:PREVIOUS]->(ps:ClassSubject)
-        # RETURN cs,  ns.title, ps.title
-        # ORDER BY cs.order
+        cc = graph.run(query, title=title)
+        return cc
+
+    def get_class_subjects_with_previous_and_forward(self, title):
+        query = '''
+                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass {title: {title}})
+                 OPTIONAL MATCH (cs)-[:FORWARD]->(ns:ClassSubject)
+                 OPTIONAL MATCH (cs)-[:PREVIOUS]->(ps:ClassSubject)
+                 RETURN cs,  ns.title as ns_title, ps.title as ps_title
+                 ORDER BY cs.order
+                '''
 
         cc = graph.run(query, title=title)
         return cc

@@ -217,7 +217,7 @@ def open_edit_class_subject(title, cc):
 def open_class_subject(title):
     check_if_teacher()
 
-    class_subjects = list(ClassSubject().get_class_subjects(title))
+    class_subjects = list(ClassSubject().get_class_subjects_with_previous_and_forward(title))
 
     return render_template(
         'class_subject.html',
