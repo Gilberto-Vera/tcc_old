@@ -131,6 +131,15 @@ class CourseClass:
         cc = matcher.match("CourseClass").order_by("_.title")
         return cc
 
+    # método que verifica se a disciplina não tem nenhum relacionamento
+    def find_single_course_class(self, cc):
+        query = '''
+                 match (cc:CourseClass {title: {cc}})
+                 where not (cc:CourseClass)<-->(:ClassSubject)
+                 return cc
+                 '''
+        cc = graph.evaluate(query, cc=cc)
+        return cc
 
 class ClassSubject:
     def find_in_course(self, cc, title):
@@ -165,7 +174,13 @@ class ClassSubject:
             # TODO SE FOR O PRIMEIRO NÓ DE UMA DISCIPLINA, AUTOMATICAMENTE É DEFINIDO COMO NÓ INICIAL.
             # TODO POSTERIORMENTE, O USUÁRIO PODERÁ MUDAR QUAL O ASSUNTO (NÓ) INICIAL DE UMA DISCIPLINA.
 
-            cs = Node("ClassSubject", title=title)
+            fscc= CourseClass().find_single_course_class(course_class)
+
+            if fscc:
+                cs = Node("ClassSubject", title=title, inicial=True)
+            else:
+                cs = Node("ClassSubject", title=title, inicial=False)
+
             graph.create(cs)
 
             graph.merge(Relationship(cs, 'TAUGHT', cc))
