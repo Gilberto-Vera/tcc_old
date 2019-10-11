@@ -3,12 +3,12 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 <div class="page">
     <h1>IF tutor</h1>
-  <h3>Tutor Utilizando Base de Dados em Grafo</h3>
-  <div class="metanav">
   {% if session.username %}
-  Olá, {{ session.person_name }}
+      <p> Olá {{ session.person_name }} </p>
   {% endif %}
-  <a href="{{ url_for('index') }}">Página Inicial</a>
+    <h3>Tutor Utilizando Base de Dados em Grafo</h3>
+    <div class="metanav">
+    <a href="{{ url_for('index') }}">Página Inicial</a>
   {% if not session.username %}
     <a href="{{ url_for('register') }}">Cadastrar</a>
     <a href="{{ url_for('login') }}">Entrar</a>
