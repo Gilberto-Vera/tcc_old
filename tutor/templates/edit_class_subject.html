@@ -10,7 +10,7 @@
             <dt>Assunto anterior:</dt>
             <dd>
                 <select name="previous_subject">
-                    <option value="">-- Nenhum assunto anterior --</option>
+                    <option value="">--  Nenhum assunto anterior --</option>
                     {% for row in cs %}
                         <option value="{{ row.cs.title }}" {{ "selected" if row.cs.title == ps }}>{{ row.cs.title }}</option>
                     {% endfor %}

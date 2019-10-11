@@ -10,7 +10,7 @@
             <dt>Assunto anterior:</dt>
             <dd>
                 <select name="previous_subject">
-                    <option value="">-- Nenhum assunto anterior --</option>
+                    <option value="">--  Nenhum assunto anterior --</option>
                     {% for row in cs %}
                         <option value="{{ row.cs.title }}">{{ row.cs.title }}</option>
                     {% endfor %}
@@ -29,7 +29,6 @@
         </dl>
         <input type="submit" value="Salvar">
     </form>
-
 
     {% include 'display_class_subjects.html' %}
 
