@@ -13,11 +13,11 @@
   {% for row in cs %}
     <tr>
     	<td>{{ row.cs.title }}</td>
-        <td align="center">-</td>
-        <td align="center">-</td>
-        <td align="center"><a href="{{ url_for('open_questions', cs_title=row.cs.title, cc_title=row.cc.title) }}">Ver questões</a><br></td>
+        <td align="center">{{ row.ps_title if row.ps_title != None else "-" }}</td>
+        <td align="center">{{ row.ns_title if row.ns_title != None else "-" }}</td>
+        <td align="center"><a href="{{ url_for('open_questions', cs_title=row.cs.title, cc_title=cc) }}">Ver questões</a><br></td>
         <td align="center"><a href="{{ url_for('open_edit_class_subject', title=row.cs.title, cc=cc) }}">Alterar</a></td>
-        <td align="center"><a href="{{ url_for('delete_class_subject', cs_title=row.cs.title, cc_title=row.cc.title) }}">Excluir</a></td>
+        <td align="center"><a href="{{ url_for('delete_class_subject', cs_title=row.cs.title, cc_title=cc) }}">Excluir</a></td>
     </tr>
   {% else %}
       <tr>
