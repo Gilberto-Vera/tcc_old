@@ -25,6 +25,8 @@
                     {% endfor %}
                 </select>
             </dd>
+            <dt>Material de apoio:</dt>
+            <dd><textarea name="support_material" cols="67" rows="3" required>{{ support_material if support_material != None }}</textarea></dd>
             <input type="hidden" name="cc" value="{{ cc }}" />
             <input type="hidden" name="title" value="{{ title }}" />
         </dl>
