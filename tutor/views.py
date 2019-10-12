@@ -202,6 +202,7 @@ def open_edit_class_subject(title, cc):
     class_subjects = list(ClassSubject().get_class_subjects(cc))
 
     cs = ClassSubject().find_in_course(cc, title)
+    ini = ClassSubject().find_inicial(title, cc)
 
     ps = ClassSubject().find_previous(title, cc)
     ns = ClassSubject().find_next(title, cc)
@@ -213,7 +214,8 @@ def open_edit_class_subject(title, cc):
         ps=ps,
         ns=ns,
         cs=class_subjects,
-        support_material=cs.evaluate()["support_material"]
+        support_material=cs.evaluate()["support_material"],
+        inicial=ini
     )
 
 

@@ -153,6 +153,14 @@ class ClassSubject:
         cc = graph.run(query, cc=cc, title=title)
         return cc
 
+    def find_inicial(self, title, cc):
+        query = '''
+                   MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                   WHERE cc.title = {cc} AND cs.title = {title}
+                   RETURN cs.inicial
+                   '''
+        return graph.evaluate(query, title=title, cc=cc)
+
     def find_previous(self, title, cc):
         query = '''
                 match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:PREVIOUS]->(c:ClassSubject)
@@ -169,6 +177,7 @@ class ClassSubject:
 
     def create(self, course_class, title, ps, ns, support_material):
         if not self.find_in_course(course_class, title).evaluate():
+
             cc = CourseClass().find(course_class)
 
             fscc = CourseClass().find_single_course_class(course_class)
