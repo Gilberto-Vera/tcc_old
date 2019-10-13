@@ -110,13 +110,26 @@ class CourseClass:
         else:
             return False
 
-    def edit(self, title, cc):
+    def edit(self, st, title, cc, ps, ns, sm, cb):
+
         query = '''
                     MATCH (cc:CourseClass {title: {cc}})
-                    SET cc.title = {title}
-                    RETURN cc
+                    OPTIONAL MATCH (cs:ClassSubject {title:{title}})
+                    WHERE (cc)<-->(cs)
+                    SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
                     '''
-        graph.run(query, title=title, cc=cc)
+        graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
+
+        # if ps:
+        #     previous_subject = self.find_in_course(cc, ps).evaluate()
+        #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
+        #
+        # if ns:
+        #     next_subject = self.find_in_course(cc, ns).evaluate()
+        #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
+
         return True
 
     def delete(self, title):
@@ -134,9 +147,9 @@ class CourseClass:
     # método que verifica se a disciplina não tem nenhum relacionamento com outro assunto
     def find_single_course_class(self, cc):
         query = '''
-                 match (cc:CourseClass {title: {cc}})
-                 where not (cc:CourseClass)<-->(:ClassSubject)
-                 return cc
+                 MATCH (cc:CourseClass {title: {cc}})
+                 WHERE NOT (cc:CourseClass)<-->(:ClassSubject)
+                 RETURN cc
                  '''
         cc = graph.evaluate(query, cc=cc)
         return cc

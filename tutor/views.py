@@ -179,15 +179,21 @@ def delete_question(id):
     return redirect(request.referrer)
 
 # CLASS SUBJECT #
-@app.route('/edit_class_subject', methods=['GET', 'POST'])
-def edit_class_subject():
+@app.route('/edit_class_subject/<inicial>', methods=['GET', 'POST'])
+def edit_class_subject(inicial):
     check_if_teacher()
 
     if request.method == 'POST':
         cc = request.form['cc']
         title = request.form['title']
+        st = request.form['subject_title']
+        ps = request.form['previous_subject']
+        ns = request.form['next_subject']
+        sm = request.form['support_material']
+        cb = inicial
+        print(inicial)
 
-        if not CourseClass().edit(title, cc):
+        if not CourseClass().edit(title, st, cc, ps, ns, sm, cb):
             flash('Erro ao alterar Disciplina')
         else:
             flash('Disciplina alterada com sucesso.')
