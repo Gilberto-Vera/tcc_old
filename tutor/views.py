@@ -191,9 +191,8 @@ def edit_class_subject(inicial):
         ns = request.form['next_subject']
         sm = request.form['support_material']
         cb = inicial
-        print(inicial)
 
-        if not CourseClass().edit(title, st, cc, ps, ns, sm, cb):
+        if not CourseClass().edit(st, title, cc, ps, ns, sm, cb):
             flash('Erro ao alterar Disciplina')
         else:
             flash('Disciplina alterada com sucesso.')
