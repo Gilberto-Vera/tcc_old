@@ -118,17 +118,26 @@ class CourseClass:
                     WHERE (cc)<-->(cs)
                     SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
                     '''
-        graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
-        # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
+        if cb == "true":
+            node = self.get_course_classes()
+            cont = 0
+            for x in node:
+                cont += 1
+            print(cont)
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+        else:
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
-        # if ps:
-        #     previous_subject = self.find_in_course(cc, ps).evaluate()
-        #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
-        #
-        # if ns:
-        #     next_subject = self.find_in_course(cc, ns).evaluate()
-        #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
+            # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
+
+            # if ps:
+            #     previous_subject = self.find_in_course(cc, ps).evaluate()
+            #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
+            #
+            # if ns:
+            #     next_subject = self.find_in_course(cc, ns).evaluate()
+            #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
 
         return True
 
@@ -196,9 +205,9 @@ class ClassSubject:
             fscc = CourseClass().find_single_course_class(course_class)
 
             if fscc:
-                cs = Node("ClassSubject", title=title, inicial=True, support_material=support_material)
+                cs = Node("ClassSubject", title=title, inicial="true", support_material=support_material)
             else:
-                cs = Node("ClassSubject", title=title, inicial=False, support_material=support_material)
+                cs = Node("ClassSubject", title=title, inicial="false", support_material=support_material)
 
             graph.create(cs)
 

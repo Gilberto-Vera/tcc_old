@@ -179,8 +179,8 @@ def delete_question(id):
     return redirect(request.referrer)
 
 # CLASS SUBJECT #
-@app.route('/edit_class_subject/<inicial>', methods=['GET', 'POST'])
-def edit_class_subject(inicial):
+@app.route('/edit_class_subject/', methods=['GET', 'POST'])
+def edit_class_subject():
     check_if_teacher()
 
     if request.method == 'POST':
@@ -190,14 +190,14 @@ def edit_class_subject(inicial):
         ps = request.form['previous_subject']
         ns = request.form['next_subject']
         sm = request.form['support_material']
-        cb = inicial
+        cb = request.form['checkbox_inicial']
 
         if not CourseClass().edit(st, title, cc, ps, ns, sm, cb):
             flash('Erro ao alterar Disciplina')
         else:
             flash('Disciplina alterada com sucesso.')
 
-    return redirect(url_for('open_course_class'))
+    return redirect(url_for('open_class_subject', title=cc))
 
 
 @app.route('/open_edit_class_subject/<title>/<cc>')

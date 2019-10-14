@@ -2,8 +2,8 @@
 {% block body %}
 
     {% if session.username %}
-    <h2>Alterando Assunto</h2>
-    <form action="{{ url_for('edit_class_subject', inicial=inicial) }}" method="post">
+        <h2 xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">Alterando Assunto</h2>
+    <form>
         <dl>
             <dt>Assunto:</dt>
             <dd><input type="text" size="30" name="subject_title" value="{{ title }}"></dd>
@@ -30,8 +30,11 @@
             <input type="hidden" name="cc" value="{{ cc }}" />
             <input type="hidden" name="title" value="{{ title }}" />
         </dl>
-        <input type="submit" value="Salvar">
-        <input type="checkbox" name="inicial" value="{{ inicial }}" {{ "checked" if inicial }}> Assunto inicial - {{ inicial }} </input>
+        Assunto Inicial?
+        <input type="radio" class="ini" name="checkbox_inicial" value="true" {{ "checked" if inicial == "true"}}> Sim
+        <input type="radio" class="ini" name="checkbox_inicial" value="false" {{ "checked" if inicial == "false"}}> Não <br> <br>
+        <input type="submit" class="button" formaction="{{ url_for('edit_class_subject') }}" formmethod="post" id="save" value="Salvar">
+        <input type="submit" class="button" formaction="{{ url_for('open_class_subject', title=cc) }}" id="cancel" value="Cancelar">
     </form>
 
     {% endif %}
