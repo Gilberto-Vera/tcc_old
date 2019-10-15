@@ -119,36 +119,26 @@ class CourseClass:
                     SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
                     '''
 
-        node = ClassSubject().get_class_subjects(cc)
-        cont = 0
-        for i in node:
-            cont += 1
-
-        if cont == 1 and cb == "false":
+        if cb == "false" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
             cb = "true"
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
+        elif cb == "true" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
+            ClassSubject().set_class_subject_false(cc)
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
         else:
-            if cb == "false" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
-                cb = "true"
-                graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
-            elif cb == "true" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
-                ClassSubject().set_class_subject_false(cc)
-                graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+        # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
 
-            else:
-                graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-            # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
-
-            # if ps:
-            #     previous_subject = self.find_in_course(cc, ps).evaluate()
-            #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
-            #
-            # if ns:
-            #     next_subject = self.find_in_course(cc, ns).evaluate()
-            #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
+        # if ps:
+        #     previous_subject = self.find_in_course(cc, ps).evaluate()
+        #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
+        #
+        # if ns:
+        #     next_subject = self.find_in_course(cc, ns).evaluate()
+        #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
 
         return True
 
