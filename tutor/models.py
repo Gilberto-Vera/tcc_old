@@ -119,15 +119,26 @@ class CourseClass:
                     SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
                     '''
 
-        if cb == "true":
-            node = self.get_course_classes()
-            cont = 0
-            for x in node:
-                cont += 1
-            print(cont)
+        node = ClassSubject().get_class_subjects(cc)
+        cont = 0
+        for i in node:
+            cont += 1
+
+        if cont == 1 and cb == "false":
+            cb = "true"
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
         else:
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+            if cb == "false" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
+                cb = "true"
+                graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+            elif cb == "true" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
+                ClassSubject().set_class_subject_false(cc)
+                graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+            else:
+                graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
             # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
 
@@ -225,7 +236,35 @@ class ClassSubject:
         else:
             return False
 
+    def set_class_subject_false(self, cc):
+        query = '''
+                MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                WHERE cc.title = {cc} AND cs.inicial = "true"
+                SET cs.inicial = "false"
+                '''
+        graph.run(query, cc=cc)
+
+    def find_class_subject_inicial(self, title, cc):
+        query = '''
+                MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                WHERE cc.title = {cc} AND cs.title = {title}
+                RETURN cs.inicial
+                '''
+
+        inicial = graph.run(query, title=title, cc=cc)
+        return inicial
+
     def get_class_subjects(self, title):
+        query = '''
+                MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                WHERE cc.title = {title}
+                RETURN cs
+                '''
+
+        cc = graph.run(query, title=title)
+        return cc
+
+    def get_class_subjects_and_course_class(self, title):
         query = '''
                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
                 WHERE cc.title = {title}

@@ -204,7 +204,7 @@ def edit_class_subject():
 def open_edit_class_subject(title, cc):
     check_if_teacher()
 
-    class_subjects = list(ClassSubject().get_class_subjects(cc))
+    class_subjects = list(ClassSubject().get_class_subjects_and_course_class(cc))
 
     cs = ClassSubject().find_in_course(cc, title)
     ini = ClassSubject().find_inicial(title, cc)
