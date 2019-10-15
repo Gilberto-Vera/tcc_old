@@ -1,0 +1,2 @@
+CREATE (n:Person {name:'User', password:'123', type:'teacher', username:'User'})
+RETURN n

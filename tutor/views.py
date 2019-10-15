@@ -179,29 +179,35 @@ def delete_question(id):
     return redirect(request.referrer)
 
 # CLASS SUBJECT #
-@app.route('/edit_class_subject', methods=['GET', 'POST'])
+@app.route('/edit_class_subject/', methods=['GET', 'POST'])
 def edit_class_subject():
     check_if_teacher()
 
     if request.method == 'POST':
         cc = request.form['cc']
         title = request.form['title']
+        st = request.form['subject_title']
+        ps = request.form['previous_subject']
+        ns = request.form['next_subject']
+        sm = request.form['support_material']
+        cb = request.form['checkbox_inicial']
 
-        if not CourseClass().edit(title, cc):
+        if not CourseClass().edit(st, title, cc, ps, ns, sm, cb):
             flash('Erro ao alterar Disciplina')
         else:
             flash('Disciplina alterada com sucesso.')
 
-    return redirect(url_for('open_course_class'))
+    return redirect(url_for('open_class_subject', title=cc))
 
 
 @app.route('/open_edit_class_subject/<title>/<cc>')
 def open_edit_class_subject(title, cc):
     check_if_teacher()
 
-    class_subjects = list(ClassSubject().get_class_subjects(cc))
+    class_subjects = list(ClassSubject().get_class_subjects_and_course_class(cc))
 
     cs = ClassSubject().find_in_course(cc, title)
+    ini = ClassSubject().find_inicial(title, cc)
 
     ps = ClassSubject().find_previous(title, cc)
     ns = ClassSubject().find_next(title, cc)
@@ -213,7 +219,8 @@ def open_edit_class_subject(title, cc):
         ps=ps,
         ns=ns,
         cs=class_subjects,
-        support_material=cs.evaluate()["support_material"]
+        support_material=cs.evaluate()["support_material"],
+        inicial=ini
     )
 
 

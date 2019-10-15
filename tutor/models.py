@@ -110,13 +110,36 @@ class CourseClass:
         else:
             return False
 
-    def edit(self, title, cc):
+    def edit(self, st, title, cc, ps, ns, sm, cb):
+
         query = '''
                     MATCH (cc:CourseClass {title: {cc}})
-                    SET cc.title = {title}
-                    RETURN cc
+                    OPTIONAL MATCH (cs:ClassSubject {title:{title}})
+                    WHERE (cc)<-->(cs)
+                    SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
                     '''
-        graph.run(query, title=title, cc=cc)
+
+        if cb == "false" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
+            cb = "true"
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        elif cb == "true" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
+            ClassSubject().set_class_subject_false(cc)
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        else:
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
+
+        # if ps:
+        #     previous_subject = self.find_in_course(cc, ps).evaluate()
+        #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
+        #
+        # if ns:
+        #     next_subject = self.find_in_course(cc, ns).evaluate()
+        #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
+
         return True
 
     def delete(self, title):
@@ -134,9 +157,9 @@ class CourseClass:
     # método que verifica se a disciplina não tem nenhum relacionamento com outro assunto
     def find_single_course_class(self, cc):
         query = '''
-                 match (cc:CourseClass {title: {cc}})
-                 where not (cc:CourseClass)<-->(:ClassSubject)
-                 return cc
+                 MATCH (cc:CourseClass {title: {cc}})
+                 WHERE NOT (cc:CourseClass)<-->(:ClassSubject)
+                 RETURN cc
                  '''
         cc = graph.evaluate(query, cc=cc)
         return cc
@@ -152,6 +175,14 @@ class ClassSubject:
                    '''
         cc = graph.run(query, cc=cc, title=title)
         return cc
+
+    def find_inicial(self, title, cc):
+        query = '''
+                   MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                   WHERE cc.title = {cc} AND cs.title = {title}
+                   RETURN cs.inicial
+                   '''
+        return graph.evaluate(query, title=title, cc=cc)
 
     def find_previous(self, title, cc):
         query = '''
@@ -169,14 +200,15 @@ class ClassSubject:
 
     def create(self, course_class, title, ps, ns, support_material):
         if not self.find_in_course(course_class, title).evaluate():
+
             cc = CourseClass().find(course_class)
 
             fscc = CourseClass().find_single_course_class(course_class)
 
             if fscc:
-                cs = Node("ClassSubject", title=title, inicial=True, support_material=support_material)
+                cs = Node("ClassSubject", title=title, inicial="true", support_material=support_material)
             else:
-                cs = Node("ClassSubject", title=title, inicial=False, support_material=support_material)
+                cs = Node("ClassSubject", title=title, inicial="false", support_material=support_material)
 
             graph.create(cs)
 
@@ -194,7 +226,35 @@ class ClassSubject:
         else:
             return False
 
+    def set_class_subject_false(self, cc):
+        query = '''
+                MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                WHERE cc.title = {cc} AND cs.inicial = "true"
+                SET cs.inicial = "false"
+                '''
+        graph.run(query, cc=cc)
+
+    def find_class_subject_inicial(self, title, cc):
+        query = '''
+                MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                WHERE cc.title = {cc} AND cs.title = {title}
+                RETURN cs.inicial
+                '''
+
+        inicial = graph.run(query, title=title, cc=cc)
+        return inicial
+
     def get_class_subjects(self, title):
+        query = '''
+                MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
+                WHERE cc.title = {title}
+                RETURN cs
+                '''
+
+        cc = graph.run(query, title=title)
+        return cc
+
+    def get_class_subjects_and_course_class(self, title):
         query = '''
                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
                 WHERE cc.title = {title}
