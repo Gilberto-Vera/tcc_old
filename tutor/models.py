@@ -2,7 +2,7 @@ from py2neo import Graph, Node, Relationship, NodeMatcher
 from datetime import datetime
 import uuid
 
-graph = Graph("http://localhost:7474", username="neo4j", password="neo4j1")
+graph = Graph("http://localhost:7474", username="neo4j", password="admin")
 matcher = NodeMatcher(graph)
 
 
@@ -110,38 +110,6 @@ class CourseClass:
         else:
             return False
 
-    def edit(self, st, title, cc, ps, ns, sm, cb):
-
-        query = '''
-                    MATCH (cc:CourseClass {title: {cc}})
-                    OPTIONAL MATCH (cs:ClassSubject {title:{title}})
-                    WHERE (cc)<-->(cs)
-                    SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
-                    '''
-
-        if cb == "false" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
-            cb = "true"
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-        elif cb == "true" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
-            ClassSubject().set_class_subject_false(cc)
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-        else:
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-        # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
-
-        # if ps:
-        #     previous_subject = self.find_in_course(cc, ps).evaluate()
-        #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
-        #
-        # if ns:
-        #     next_subject = self.find_in_course(cc, ns).evaluate()
-        #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
-
-        return True
-
     def delete(self, title):
         if self.find(title):
             cc = matcher.match("CourseClass", title__exact=title).first()
@@ -225,6 +193,40 @@ class ClassSubject:
             return True
         else:
             return False
+
+    def edit(self, st, title, cc, ps, ns, sm, cb):
+
+        query = '''
+                    MATCH (cc:CourseClass {title: {cc}})
+                    OPTIONAL MATCH (cs:ClassSubject {title:{title}})
+                    WHERE (cc)<-->(cs)
+                    SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
+                    '''
+
+        if cb == "false" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
+            cb = "true"
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        elif cb == "true" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
+            ClassSubject().set_class_subject_false(cc)
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        else:
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
+
+        # if ps:
+        # TODO Isso  aqui mesmo, só falta excluir o relacionamento PREVIOUS primeiro
+        #     previous_subject = self.find_in_course(cc, ps).evaluate()
+        #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
+        #
+        # if ns:
+        # TODO Isso  aqui mesmo, só falta excluir o relacionamento FORWARD primeiro
+        #     next_subject = self.find_in_course(cc, ns).evaluate()
+        #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
+
+        return True
 
     def set_class_subject_false(self, cc):
         query = '''
