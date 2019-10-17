@@ -2,7 +2,7 @@ from py2neo import Graph, Node, Relationship, NodeMatcher
 from datetime import datetime
 import uuid
 
-graph = Graph("http://localhost:7474", username="neo4j", password="admin")
+graph = Graph("http://localhost:7474", username="neo4j", password="neo4j1")
 matcher = NodeMatcher(graph)
 
 
@@ -118,7 +118,6 @@ class CourseClass:
         else:
             return False
 
-<<<<<<< HEAD
     def create_relationship_course_class_previous(self, cc, title, ps):
         query = '''
                 MATCH (cc:CourseClass)<-->(cs:ClassSubject), (cc:CourseClass)<-->(cs1:ClassSubject)
@@ -163,10 +162,15 @@ class CourseClass:
             self.delete_forward_course_class(cc, title)
             self.create_relationship_course_class_forward(cc, title, ns)
 
+        if not ps:
+            self.delete_previous_course_class(cc, title)
+
+        if not ns:
+            self.delete_forward_course_class(cc, title)
+
+
         return True
 
-=======
->>>>>>> 217b42052d118ec4e839b3e83a2d505336d6b2ff
     def delete(self, title):
         if self.find(title):
             cc = matcher.match("CourseClass", title__exact=title).first()
@@ -204,7 +208,6 @@ class CourseClass:
                  '''
         cc = graph.evaluate(query, cc=cc)
         return cc
-
 
 class ClassSubject:
     def find_in_course(self, cc, title):
