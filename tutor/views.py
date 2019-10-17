@@ -19,20 +19,26 @@ def register():
         name = request.form['name']
         username = request.form['username']
         password = request.form['password']
+        confirm_password = request.form['confirm_password']
         type = "student"
 
-        if len(username) < 1:
-            flash('Nome de usuário deve possuir pelo menos 1 caractere')
-        elif len(password) < 3:
-            flash('Senha deve ter pelo menos 3 caracteres')
-        elif not Person(username).register(name, password, type):
+        if not Person(username).confirm_passwords(password, confirm_password):
+            flash('As senhas não são iguais')
+            return render_template('register.html',
+                            name=name,
+                            username=username
+            )
+
+        elif Person(username).find():
             flash('Nome de usuário já existente')
+            return render_template('register.html')
+
         else:
             session['username'] = username
             session['name'] = name
             session['type'] = "student"
-            flash('Login efetuado com sucesso.')
-            return redirect(url_for('index'))
+            flash('Cadastro efetuado com sucesso.')
+            return redirect(url_for('login'))
 
     return render_template('register.html')
 
@@ -331,7 +337,7 @@ def profile(username):
     )
 
 
-# VERIFICA SE É PROFESSOR #
+# VERIFICA USUARIO #
 def check_if_teacher():
     username = session.get('username')
     t = session.get('type')
