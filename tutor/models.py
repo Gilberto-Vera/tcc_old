@@ -134,41 +134,13 @@ class CourseClass:
                 '''
         graph.run(query, cc=cc, title=title, ns=ns)
 
-    def edit(self, st, title, cc, ps, ns, sm, cb):
-
+    def edit(self, title, cc):
         query = '''
                     MATCH (cc:CourseClass {title: {cc}})
-                    OPTIONAL MATCH (cs:ClassSubject {title:{title}})
-                    WHERE (cc)<-->(cs)
-                    SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
+                    SET cc.title = {title}
+                    RETURN cc
                     '''
-
-        if cb == "false" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
-            cb = "true"
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-        elif cb == "true" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
-            ClassSubject().set_class_subject_false(cc)
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-        else:
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-        if ps:
-            self.delete_previous_course_class(cc, title)
-            self.create_relationship_course_class_previous(cc, title, ps)
-
-        if ns:
-            self.delete_forward_course_class(cc, title)
-            self.create_relationship_course_class_forward(cc, title, ns)
-
-        if not ps:
-            self.delete_previous_course_class(cc, title)
-
-        if not ns:
-            self.delete_forward_course_class(cc, title)
-
-
+        graph.run(query, title=title, cc=cc)
         return True
 
     def delete(self, title):
@@ -271,7 +243,6 @@ class ClassSubject:
             return False
 
     def edit(self, st, title, cc, ps, ns, sm, cb):
-
         query = '''
                     MATCH (cc:CourseClass {title: {cc}})
                     OPTIONAL MATCH (cs:ClassSubject {title:{title}})
@@ -290,17 +261,19 @@ class ClassSubject:
         else:
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
-        # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
+        if ps:
+            self.delete_previous_course_class(cc, title)
+            self.create_relationship_course_class_previous(cc, title, ps)
 
-        # if ps:
-        # TODO Isso  aqui mesmo, só falta excluir o relacionamento PREVIOUS primeiro
-        #     previous_subject = self.find_in_course(cc, ps).evaluate()
-        #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
-        #
-        # if ns:
-        # TODO Isso  aqui mesmo, só falta excluir o relacionamento FORWARD primeiro
-        #     next_subject = self.find_in_course(cc, ns).evaluate()
-        #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
+        if ns:
+            self.delete_forward_course_class(cc, title)
+            self.create_relationship_course_class_forward(cc, title, ns)
+
+        if not ps:
+            self.delete_previous_course_class(cc, title)
+
+        if not ns:
+            self.delete_forward_course_class(cc, title)
 
         return True
 

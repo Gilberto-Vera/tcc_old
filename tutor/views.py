@@ -114,7 +114,9 @@ def create_course_class():
     if request.method == 'POST':
         title = request.form['title']
 
-        if not CourseClass().create(title):
+        if len(title) < 1:
+            flash('A Disciplina deve possuir pelo menos 1 caractere')
+        elif not CourseClass().create(title):
             flash('Disciplina já existente')
         else:
             flash('Disciplina criada com sucesso.')
@@ -198,10 +200,10 @@ def edit_class_subject():
         sm = request.form['support_material']
         cb = request.form['checkbox_inicial']
 
-        if not CourseClass().edit(st, title, cc, ps, ns, sm, cb):
-            flash('Erro ao alterar Disciplina')
+        if not ClassSubject().edit(st, title, cc, ps, ns, sm, cb):
+            flash('Erro ao alterar assunto')
         else:
-            flash('Disciplina alterada com sucesso.')
+            flash('Assunto alterado com sucesso.')
 
     return redirect(url_for('open_class_subject', title=cc))
 
@@ -258,6 +260,8 @@ def delete_class_subject(cs_title, cc_title):
 @app.route('/create_class_subject', methods=['GET', 'POST'])
 def create_class_subject():
     check_if_teacher()
+
+    print(request.form['subject_title'])
 
     if request.method == 'POST':
         title = request.form['subject_title']
