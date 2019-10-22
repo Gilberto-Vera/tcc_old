@@ -2,7 +2,7 @@
 {% block body %}
 
     {% if session.username %}
-        <h2 xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">Alterando Assunto</h2>
+        <h2>Alterar {{ title }}</h2>
     <form>
         <dl>
             <dt>Assunto:</dt>
@@ -33,7 +33,7 @@
         Assunto Inicial?
         <input type="radio" class="ini" name="checkbox_inicial" value="true" {{ "checked" if inicial == "true"}}> Sim
         <input type="radio" class="ini" name="checkbox_inicial" value="false" {{ "checked" if inicial == "false"}}> Não <br> <br>
-        <input type="submit" class="button" formaction="{{ url_for('edit_class_subject') }}" formmethod="post" id="save" value="Salvar">
+        <input type="submit" class="button" formaction="{{ url_for('edit_class_subject') }}" formmethod="post" value="Salvar">
         <input type="submit" class="button" formaction="{{ url_for('open_class_subject', title=cc) }}" id="cancel" value="Cancelar">
     </form>
 

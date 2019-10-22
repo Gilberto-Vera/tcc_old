@@ -5,18 +5,21 @@ h1, h2          { border-bottom: 2px solid #eee; padding: 3px; }
 h3              { padding: 3px; }
 dd              { display: block; margin-left: 0px; }
 dl              { font-weight: bold; }
+h2              { text-align: center; }
 
 /*#save           { float: right; }*/
-#cancel         { float: right; margin-left: 20px; }
+#cancel         { float: right; margin-left: 19px; }
+#initial        { float: left; font-size: 1em; color: #377ba8; }
 
+.session        { display: inline-block; }
 .button form    { display: inline; }
 a:visited 		{ color: #800080; }
-.session        { float: left; font-size: 1em; color: #377ba8; }
 .checkbox       { text-align: right; }
 .page           { margin: 2em auto; width: 35em; border: 5px solid #ccc; padding: 0.8em; background: white; }
 .posts          { list-style: none; margin: 0; padding: 0; }
 .posts li       { margin: 0.8em 1.2em; }
 .posts li h2    { margin-left: -1em; }
-.metanav        { text-align: right; font-size: 0.8em; padding: 0.3em; margin-bottom: 1em; background: #fafafa; }
+.metanav        { text-align: right; font-size: 1em; padding: 0.3em; margin-bottom: 0.5em; background: #fafafa; }
 .flash          { background: #cee5F5; padding: 0.5em; border: 1px solid #aacbe2; }
 .error   q      { background: #f0d6d6; padding: 0.5em; }
+.orientation    { float: right; margin-right: 370px; margin-top: 1px; font-size: 0.8em; color: #377ba8; }

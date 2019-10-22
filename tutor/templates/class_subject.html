@@ -2,10 +2,10 @@
 {% block body %}
 
     {% if session.username %}
-    <h2>Novo Assunto - {{ cc }}</h2>
-    <form action="{{ url_for('create_class_subject') }}" method="post">
+    <h2>{{ cc }}</h2>
+    <form>
         <dl>
-            <dt>Novo Assunto:</dt>
+            <dt>Título do Assunto:</dt>
             <dd><input type="text" size="30" name="subject_title"></dd>
             <dt>Assunto anterior:</dt>
             <dd>
@@ -26,10 +26,11 @@
                 </select>
             </dd>
             <dt>Material de apoio:</dt>
-            <dd><textarea name="support_material" cols="67" rows="3" required></textarea></dd>
+            <dd><textarea name="support_material" cols="67" rows="3"></textarea></dd>
             <input type="hidden" name="cc" value="{{ cc }}" />
         </dl>
-        <input type="submit" value="Salvar">
+        <input type="submit" class="button" formaction="{{ url_for('create_class_subject') }}" formmethod="post" value="Criar Novo Assunto">
+        <input type="submit" class="button" formaction="{{ url_for('open_course_class') }}" id="cancel" value="Voltar">
     </form>
 
     {% include 'display_class_subjects.html' %}

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {% if session.username %}
+    <h2>Confirmar exclusão</h2>
+    <form>
+        <input type="submit" class="button" formaction="{{ url_for('delete_question', id=id, cc=cc, cs=cs) }}" value="Sim">
+        <input type="submit" class="button" formaction="{{ url_for('open_questions', cs_title=cs, cc_title=cc) }}" id="cancel" value="Não">
+        <input type="hidden" value="{{ id }}">
+        <input type="hidden" name="cs" value="{{ cs }}" />
+        <input type="hidden" name="cc" value="{{ cc }}" />
+
+    </form>
+
+    {% endif %}
+
+{% endblock %}

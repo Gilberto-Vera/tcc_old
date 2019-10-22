@@ -22,6 +22,13 @@ class Person:
         else:
             return False
 
+    def confirm_passwords(self, password, confirm_password):
+
+        if password == confirm_password:
+            return True
+        else:
+            return False
+
     def verify_password(self, password):
         user = self.find()
         if user:
@@ -48,7 +55,7 @@ class Person:
         tags = [x.strip() for x in tags.lower().split(',')]
         for name in set(tags):
             tag = Node("Tag", name=name)
-            #graph.merge(tag, "Tag", "name")
+            # graph.merge(tag, "Tag", "name")
 
             rel = Relationship(tag, 'TAGGED', post)
             graph.create(rel)
@@ -110,36 +117,29 @@ class CourseClass:
         else:
             return False
 
-    def edit(self, st, title, cc, ps, ns, sm, cb):
+    def create_relationship_course_class_previous(self, cc, title, ps):
+        query = '''
+                MATCH (cc:CourseClass)<-->(cs:ClassSubject), (cc:CourseClass)<-->(cs1:ClassSubject)
+                WHERE (cc.title = {cc}) AND (cs.title = {title}) AND (cs1.title = {ps})
+                CREATE (cs)-[r:PREVIOUS]->(cs1)
+                '''
+        graph.run(query, cc=cc, title=title, ps=ps)
 
+    def create_relationship_course_class_forward(self, cc, title, ns):
+        query = '''
+                MATCH (cc:CourseClass)<-->(cs:ClassSubject), (cc:CourseClass)<-->(cs1:ClassSubject)
+                WHERE (cc.title = {cc}) AND (cs.title = {title}) AND (cs1.title = {ns})
+                CREATE (cs)-[r:FORWARD]->(cs1)
+                '''
+        graph.run(query, cc=cc, title=title, ns=ns)
+
+    def edit(self, title, cc):
         query = '''
                     MATCH (cc:CourseClass {title: {cc}})
-                    OPTIONAL MATCH (cs:ClassSubject {title:{title}})
-                    WHERE (cc)<-->(cs)
-                    SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
+                    SET cc.title = {title}
+                    RETURN cc
                     '''
-
-        if cb == "false" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
-            cb = "true"
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-        elif cb == "true" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
-            ClassSubject().set_class_subject_false(cc)
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-        else:
-            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
-
-        # cs = Node("ClassSubject", title=title, support_material=sm, inicial=cb)
-
-        # if ps:
-        #     previous_subject = self.find_in_course(cc, ps).evaluate()
-        #     graph.merge(Relationship(cs, 'PREVIOUS', previous_subject))
-        #
-        # if ns:
-        #     next_subject = self.find_in_course(cc, ns).evaluate()
-        #     graph.merge(Relationship(cs, 'FORWARD', next_subject))
-
+        graph.run(query, title=title, cc=cc)
         return True
 
     def delete(self, title):
@@ -149,6 +149,22 @@ class CourseClass:
             return True
         else:
             return False
+
+    def delete_previous_course_class(self, cc, title):
+        query = '''
+                MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
+                OPTIONAL MATCH (cs)-[r:PREVIOUS]->(ps:ClassSubject)
+                DELETE r
+                '''
+        graph.run(query, cc=cc, title=title)
+
+    def delete_forward_course_class(self, cc, title):
+        query = '''
+                MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
+                OPTIONAL MATCH (cs)-[r:FORWARD]->(ps:ClassSubject)
+                DELETE r
+                '''
+        graph.run(query, cc=cc, title=title)
 
     def get_course_classes(self):
         cc = matcher.match("CourseClass").order_by("_.title")
@@ -166,6 +182,17 @@ class CourseClass:
 
 
 class ClassSubject:
+
+    # método que retorna a quantidade de nós ClassSubject
+    def find_node_count(self, cc, title):
+        query = '''
+                    MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject)
+                    OPTIONAL MATCH (cs)<-->(cs {title: {title}})
+                    RETURN count(cs)
+                '''
+        count = graph.evaluate(query, cc=cc, title=title)
+        return count
+
     def find_in_course(self, cc, title):
         query = '''
                    MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
@@ -176,7 +203,7 @@ class ClassSubject:
         cc = graph.run(query, cc=cc, title=title)
         return cc
 
-    def find_inicial(self, title, cc):
+    def find_inicial_value(self, title, cc):
         query = '''
                    MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
                    WHERE cc.title = {cc} AND cs.title = {title}
@@ -184,19 +211,34 @@ class ClassSubject:
                    '''
         return graph.evaluate(query, title=title, cc=cc)
 
-    def find_previous(self, title, cc):
+    def find_inicial(self, title, cc):
         query = '''
-                match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:PREVIOUS]->(c:ClassSubject)
-                return c.title
-                '''
+                   MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject {title: {title}})
+                   WHERE NOT cs.inicial = "true"
+                   RETURN cs
+                   '''
+        cs = graph.evaluate(query, title=title, cc=cc)
+        return cs
+
+    def find_previous(self, title, cc):
+        query = '''match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:PREVIOUS]->(
+        c:ClassSubject) return c.title '''
         return graph.evaluate(query, title=title, cc=cc)
 
     def find_next(self, title, cc):
-        query = '''
-                match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:FORWARD]->(c:ClassSubject)
-                return c.title
-                '''
+        query = '''match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:FORWARD]->(
+        c:ClassSubject) return c.title '''
         return graph.evaluate(query, title=title, cc=cc)
+
+    # método que verifica se o assunto não tem nenhum relacionamento com uma questão
+    def find_single_class_subject(self, title, cc_title):
+        query = '''
+                 MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject {title: {title}})
+                 WHERE NOT (cs)<-->(:Question)
+                 RETURN cs
+                 '''
+        cc = graph.evaluate(query, cc=cc_title, title=title)
+        return cc
 
     def create(self, course_class, title, ps, ns, support_material):
         if not self.find_in_course(course_class, title).evaluate():
@@ -225,6 +267,45 @@ class ClassSubject:
             return True
         else:
             return False
+
+    def edit(self, st, title, cc, ps, ns, sm, cb):
+        query = '''
+                    MATCH (cc:CourseClass {title: {cc}})
+                    OPTIONAL MATCH (cs:ClassSubject {title:{title}})
+                    WHERE (cc)<-->(cs)
+                    SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
+                    '''
+
+        if cb == "false" and cb != self.find_class_subject_inicial(title, cc).evaluate() and self.find_node_count(cc,
+                                                                                                                  title) > 1:
+            cb = "true"
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        elif cb == "false" and self.find_node_count(cc, title) == 1:
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        elif cb == "true" and cb != self.find_class_subject_inicial(title, cc).evaluate():
+            self.set_class_subject_false(cc)
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        else:
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        if ps:
+            CourseClass().delete_previous_course_class(cc, title)
+            CourseClass().create_relationship_course_class_previous(cc, title, ps)
+
+        if ns:
+            CourseClass().delete_forward_course_class(cc, title)
+            CourseClass().create_relationship_course_class_forward(cc, title, ns)
+
+        if not ps:
+            CourseClass().delete_previous_course_class(cc, title)
+
+        if not ns:
+            CourseClass().delete_forward_course_class(cc, title)
+
+        return True
 
     def set_class_subject_false(self, cc):
         query = '''
@@ -322,6 +403,19 @@ class Question:
         graph.merge(Relationship(u, 'CREATED', question))
         return True
 
+    def edit(self, question_id, title, body, support_material, difficulty, choice_a, choice_b, choice_c,
+             choice_d, right_answer):
+        query = '''
+                MATCH (q:Question {id: {question_id}})
+                SET q.title = {title}, q.body = {body}, q.support_material = {support_material}, q.difficulty = 
+                {difficulty}, q.choice_a = {choice_a}, q.choice_b = {choice_b}, q.choice_c = {choice_c}, q.choice_d =
+                {choice_d}, q.right_answer = {right_answer}
+                '''
+        graph.run(query, question_id=question_id, title=title, body=body, support_material=support_material,
+                  difficulty=difficulty, choice_a=choice_a, choice_b=choice_b, choice_c=choice_c, choice_d=choice_d,
+                  right_answer=right_answer)
+        return True
+
     def get_questions(self, cs_title, cc_title):
         query = '''
             MATCH (q:Question)-[:ASKED]->(cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
@@ -332,6 +426,14 @@ class Question:
         question = graph.run(query, cs_title=cs_title, cc_title=cc_title)
         return question
 
+    def get_question(self, question_id):
+        query = '''
+            MATCH (q:Question {id: {question}})
+            RETURN q
+            '''
+        question = graph.run(query, question=question_id)
+        return question
+
     def delete(self, id):
         if self.find(id):
             question = matcher.match("Question", id__exact=id).first()
@@ -339,6 +441,7 @@ class Question:
             return True
         else:
             return False
+
 
 def get_todays_recent_posts():
     query = '''

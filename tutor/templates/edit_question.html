@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {% if session.username %}
+    <h2>Questão do assunto {{ cs }}</h2>
+    <form>
+{# Formulário para criar uma questão #}
+        <dl>
+            <dt>Título:</dt>
+            <dd><input type="text" size="30" name="question_title" value="{{ q.title }}"></dd>
+            <dt>Material de Apoio:</dt>
+            <dd><textarea name="support_material" cols="67" rows="3">{{  q.support_material if q.support_material != None  }}</textarea></dd>
+            <dt>Enunciado:</dt>
+            <dd><textarea name="question_body" cols="67" rows="3">{{  q.body if q.body != None  }}</textarea></dd>
+            <dt>Alternativa A: <input type="radio" name="right_answer" value="a" {{ "checked" if q.right_answer == "a" }}><label>Resposta correta</label></dt>
+                <dd><textarea name="choice_a" cols="67" rows="1">{{  q.choice_a if q.choice_a != None  }}</textarea>&nbsp;</dd>
+            <dt>Alternativa B: <input type="radio" name="right_answer" value="b" {{ "checked" if q.right_answer == "b" }}><label>Resposta correta</label></dt>
+                <dd><textarea name="choice_b" cols="67" rows="1">{{  q.choice_b if q.choice_b != None  }}</textarea></dd>
+            <dt>Alternativa C: <input type="radio" name="right_answer" value="c" {{ "checked" if q.right_answer == "c" }}><label>Resposta correta</label></dt>
+                <dd><textarea name="choice_c" cols="67" rows="1">{{  q.choice_c if q.choice_c != None  }}</textarea></dd>
+            <dt>Alternativa D: <input type="radio" name="right_answer" value="d" {{ "checked" if q.right_answer == "d" }}><label>Resposta correta</label></dt>
+                <dd><textarea name="choice_d" cols="67" rows="1">{{  q.choice_d if q.choice_d != None  }}</textarea></dd>
+            <dt>Nível de Dificuldade:</dt>
+            <dd>
+                <p class="orientation">(de 1-fácil até 10-difícil)</p>
+                <select name="difficulty">
+                    <option value="1" {{ "selected" if q.difficulty == "1" }}>1</option>
+                    <option value="2" {{ "selected" if q.difficulty == "2" }}>2</option>
+                    <option value="3" {{ "selected" if q.difficulty == "3" }}>3</option>
+                    <option value="4" {{ "selected" if q.difficulty == "4" }}>4</option>
+                    <option value="5" {{ "selected" if q.difficulty == "5" }}>5</option>
+                    <option value="6" {{ "selected" if q.difficulty == "6" }}>6</option>
+                    <option value="7" {{ "selected" if q.difficulty == "7" }}>7</option>
+                    <option value="8" {{ "selected" if q.difficulty == "8" }}>8</option>
+                    <option value="9" {{ "selected" if q.difficulty == "9" }}>9</option>
+                    <option value="10" {{ "selected" if q.difficulty == "10" }}>10</option>
+                </select>
+            </dd>
+            <input type="hidden" name="cs" value="{{ cs }}" />
+            <input type="hidden" name="cc" value="{{ cc }}" />
+            <input type="hidden" name="question_id" value="{{ q.id }}" />
+        </dl>
+        <input type="submit" class="button" formaction="{{ url_for('edit_question', question_id=q.id, cs=cs, cc=cc) }}" formmethod="post" value="Salvar">
+        <input type="submit" class="button" formaction="{{ url_for('open_questions', cs_title=cs, cc_title=cc) }}" id="cancel" value="Voltar">
+    </form>
+
+    {% endif %}
+
+{% endblock %}
