@@ -131,7 +131,7 @@ def confirm_delete_course_class(title):
     flash('Tem certeza de deseja excluir essa Disciplina?')
 
     return render_template(
-        'confirm_delete.html',
+        'confirm_delete_course_class.html',
         cc=title
     )
 
@@ -147,6 +147,115 @@ def delete_course_class(title):
         flash('Disciplina excluida com sucesso.')
 
     return redirect(url_for('open_course_class'))
+
+
+# CLASS SUBJECT #
+@app.route('/edit_class_subject/', methods=['GET', 'POST'])
+def edit_class_subject():
+    check_if_teacher()
+
+    if request.method == 'POST':
+        cc = request.form['cc']
+        title = request.form['title']
+        st = request.form['subject_title']
+        ps = request.form['previous_subject']
+        ns = request.form['next_subject']
+        sm = request.form['support_material']
+        cb = request.form['checkbox_inicial']
+
+        if not ClassSubject().edit(st, title, cc, ps, ns, sm, cb):
+            flash('Erro ao alterar assunto')
+        else:
+            flash('Assunto alterado com sucesso.')
+
+    return redirect(url_for('open_class_subject', title=cc))
+
+
+@app.route('/open_edit_class_subject/<title>/<cc>')
+def open_edit_class_subject(title, cc):
+    check_if_teacher()
+
+    class_subjects = list(ClassSubject().get_class_subjects_and_course_class(cc))
+
+    cs = ClassSubject().find_in_course(cc, title)
+    ini = ClassSubject().find_inicial_value(title, cc)
+
+    ps = ClassSubject().find_previous(title, cc)
+    ns = ClassSubject().find_next(title, cc)
+
+    return render_template(
+        'edit_class_subject.html',
+        cc=cc,
+        title=title,
+        ps=ps,
+        ns=ns,
+        cs=class_subjects,
+        support_material=cs.evaluate()["support_material"],
+        inicial=ini
+    )
+
+
+@app.route('/open_class_subject/<title>')
+def open_class_subject(title):
+    check_if_teacher()
+
+    class_subjects = list(ClassSubject().get_class_subjects_with_previous_and_forward(title))
+
+    return render_template(
+        'class_subject.html',
+        cc=title,
+        cs=class_subjects
+    )
+
+
+@app.route('/confirm_delete_class_subject/<cs_title>/<cc_title>')
+def confirm_delete_class_subject(cs_title, cc_title):
+    check_if_teacher()
+
+    flash('Tem certeza de deseja excluir esse assunto?')
+
+    return render_template(
+        'confirm_delete_class_subject.html',
+        cc=cc_title,
+        cs=cs_title
+    )
+
+
+@app.route('/delete_class_subject/<cs_title>/<cc_title>')
+def delete_class_subject(cs_title, cc_title):
+    check_if_teacher()
+
+    if not ClassSubject().find_single_class_subject(cs_title, cc_title):
+        flash('Assunto possui relacionamento, não pode ser exluida.')
+    elif not ClassSubject().find_inicial(cs_title, cc_title):
+        flash('Assunto inicial, não pode ser exluida.')
+    else:
+        ClassSubject().delete(cs_title, cc_title)
+        flash('Assunto excluido com sucesso.')
+
+    return redirect(url_for('open_class_subject', title=cc_title))
+
+
+@app.route('/create_class_subject', methods=['GET', 'POST'])
+def create_class_subject():
+    check_if_teacher()
+
+    if request.method == 'POST':
+        title = request.form['subject_title']
+        cc = request.form['cc']
+        support_material = request.form['support_material']
+        ps = request.form.get('previous_subject')
+        ns = request.form.get('next_subject')
+
+        if len(title) < 1:
+            flash('O assunto deve possuir pelo menos 1 caractere')
+        elif not ClassSubject().create(cc, title, ps, ns, support_material):
+            flash('Assunto já existente')
+        else:
+            flash('Assunto criado com sucesso.')
+
+    return redirect(request.referrer)
+
 
 # QUESTIONS #
 @app.route('/open_questions/<cs_title>/<cc_title>')
@@ -196,99 +305,6 @@ def delete_question(id):
         flash('Questão não encontrada')
     else:
         flash('Questão excluida com sucesso.')
-
-    return redirect(request.referrer)
-
-# CLASS SUBJECT #
-@app.route('/edit_class_subject/', methods=['GET', 'POST'])
-def edit_class_subject():
-    check_if_teacher()
-
-    if request.method == 'POST':
-        cc = request.form['cc']
-        title = request.form['title']
-        st = request.form['subject_title']
-        ps = request.form['previous_subject']
-        ns = request.form['next_subject']
-        sm = request.form['support_material']
-        cb = request.form['checkbox_inicial']
-
-        if not ClassSubject().edit(st, title, cc, ps, ns, sm, cb):
-            flash('Erro ao alterar assunto')
-        else:
-            flash('Assunto alterado com sucesso.')
-
-    return redirect(url_for('open_class_subject', title=cc))
-
-
-@app.route('/open_edit_class_subject/<title>/<cc>')
-def open_edit_class_subject(title, cc):
-    check_if_teacher()
-
-    class_subjects = list(ClassSubject().get_class_subjects_and_course_class(cc))
-
-    cs = ClassSubject().find_in_course(cc, title)
-    ini = ClassSubject().find_inicial(title, cc)
-
-    ps = ClassSubject().find_previous(title, cc)
-    ns = ClassSubject().find_next(title, cc)
-
-    return render_template(
-        'edit_class_subject.html',
-        cc=cc,
-        title=title,
-        ps=ps,
-        ns=ns,
-        cs=class_subjects,
-        support_material=cs.evaluate()["support_material"],
-        inicial=ini
-    )
-
-
-@app.route('/open_class_subject/<title>')
-def open_class_subject(title):
-    check_if_teacher()
-
-    class_subjects = list(ClassSubject().get_class_subjects_with_previous_and_forward(title))
-
-    return render_template(
-        'class_subject.html',
-        cc=title,
-        cs=class_subjects
-    )
-
-
-@app.route('/delete_class_subject/<cs_title>/<cc_title>')
-def delete_class_subject(cs_title, cc_title):
-    check_if_teacher()
-
-    if not ClassSubject().delete(cs_title, cc_title):
-        flash('Assunto não encontrada')
-    else:
-        flash('Assunto excluido com sucesso.')
-
-    return redirect(request.referrer)
-
-
-@app.route('/create_class_subject', methods=['GET', 'POST'])
-def create_class_subject():
-    check_if_teacher()
-
-    print(request.form['subject_title'])
-
-    if request.method == 'POST':
-        title = request.form['subject_title']
-        cc = request.form['cc']
-        support_material = request.form['support_material']
-        ps = request.form.get('previous_subject')
-        ns = request.form.get('next_subject')
-
-        if len(title) < 1:
-            flash('O assunto deve possuir pelo menos 1 caractere')
-        elif not ClassSubject().create(cc, title, ps, ns, support_material):
-            flash('Assunto já existente')
-        else:
-            flash('Assunto criado com sucesso.')
 
     return redirect(request.referrer)
 

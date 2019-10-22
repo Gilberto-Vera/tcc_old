@@ -192,7 +192,7 @@ class ClassSubject:
         cc = graph.run(query, cc=cc, title=title)
         return cc
 
-    def find_inicial(self, title, cc):
+    def find_inicial_value(self, title, cc):
         query = '''
                    MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
                    WHERE cc.title = {cc} AND cs.title = {title}
@@ -200,19 +200,34 @@ class ClassSubject:
                    '''
         return graph.evaluate(query, title=title, cc=cc)
 
-    def find_previous(self, title, cc):
+    def find_inicial(self, title, cc):
         query = '''
-                match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:PREVIOUS]->(c:ClassSubject)
-                return c.title
-                '''
+                   MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject {title: {title}})
+                   WHERE NOT cs.inicial = "true"
+                   RETURN cs
+                   '''
+        cs = graph.evaluate(query, title=title, cc=cc)
+        return cs
+
+    def find_previous(self, title, cc):
+        query = '''match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:PREVIOUS]->(
+        c:ClassSubject) return c.title '''
         return graph.evaluate(query, title=title, cc=cc)
 
     def find_next(self, title, cc):
-        query = '''
-                match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:FORWARD]->(c:ClassSubject)
-                return c.title
-                '''
+        query = '''match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:FORWARD]->(
+        c:ClassSubject) return c.title '''
         return graph.evaluate(query, title=title, cc=cc)
+
+    # método que verifica se o assunto não tem nenhum relacionamento com uma questão
+    def find_single_class_subject(self, title, cc_title):
+        query = '''
+                 MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject {title: {title}})
+                 WHERE NOT (cs)<-->(:Question)
+                 RETURN cs
+                 '''
+        cc = graph.evaluate(query, cc=cc_title, title=title)
+        return cc
 
     def create(self, course_class, title, ps, ns, support_material):
         if not self.find_in_course(course_class, title).evaluate():
@@ -262,18 +277,18 @@ class ClassSubject:
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
         if ps:
-            self.delete_previous_course_class(cc, title)
-            self.create_relationship_course_class_previous(cc, title, ps)
+            CourseClass().delete_previous_course_class(cc, title)
+            CourseClass().create_relationship_course_class_previous(cc, title, ps)
 
         if ns:
-            self.delete_forward_course_class(cc, title)
-            self.create_relationship_course_class_forward(cc, title, ns)
+            CourseClass().delete_forward_course_class(cc, title)
+            CourseClass().create_relationship_course_class_forward(cc, title, ns)
 
         if not ps:
-            self.delete_previous_course_class(cc, title)
+            CourseClass().delete_previous_course_class(cc, title)
 
         if not ns:
-            self.delete_forward_course_class(cc, title)
+            CourseClass().delete_forward_course_class(cc, title)
 
         return True
 
