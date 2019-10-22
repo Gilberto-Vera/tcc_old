@@ -124,16 +124,26 @@ def create_course_class():
     return redirect(request.referrer)
 
 
+@app.route('/confirm_delete_course_class/<title>')
+def confirm_delete_course_class(title):
+    check_if_teacher()
+
+    flash('Tem certeza de deseja excluir essa Disciplina?')
+
+    return render_template(
+        'confirm_delete.html',
+        cc=title
+    )
+
+
 @app.route('/delete_course_class/<title>')
 def delete_course_class(title):
     check_if_teacher()
 
-    if not CourseClass().delete(title):
-        flash('Disciplina não encontrada')
-    else:
-        flash('Disciplina excluida com sucesso.')
+    CourseClass().delete(title)
+    flash('Disciplina excluida com sucesso.')
 
-    return redirect(request.referrer)
+    return redirect(url_for('open_course_class'))
 
 # QUESTIONS #
 @app.route('/open_questions/<cs_title>/<cc_title>')

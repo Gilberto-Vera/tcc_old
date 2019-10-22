@@ -12,7 +12,7 @@
             <tr>
                 <td>{{ row.title }}</td>
                 <td><a href="{{ url_for('open_edit_course_class', title=row.title) }}"> Alterar </a></td>
-                <td><a href="{{ url_for('delete_course_class', title=row.title) }}"> Excluir </a></td>
+                <td><a href="{{ url_for('confirm_delete_course_class', title=row.title) }}"> Excluir </a></td>
                 <td><a href="{{ url_for('open_class_subject', title=row.title) }}"> Ver Assuntos da Disciplina </a></td>
             </tr>
             {% else %}

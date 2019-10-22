@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {% if session.username %}
+    <h2>Confirmar exclusão</h2>
+    <form>
+        <input type="submit" class="button" formaction="{{ url_for('delete_course_class', title=cc) }}" value="Sim">
+        <input type="submit" class="button" formaction="{{ url_for('open_course_class') }}" id="cancel" value="Não">
+        <input type="hidden" value="{{ cc }}">
+    </form>
+
+    {% endif %}
+
+{% endblock %}

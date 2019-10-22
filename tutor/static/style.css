@@ -5,6 +5,7 @@ h1, h2          { border-bottom: 2px solid #eee; padding: 3px; }
 h3              { padding: 3px; }
 dd              { display: block; margin-left: 0px; }
 dl              { font-weight: bold; }
+h2              { text-align: center; }
 
 /*#save           { float: right; }*/
 #cancel         { float: right; margin-left: 19px; }
