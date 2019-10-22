@@ -25,9 +25,9 @@ def register():
         if not Person(username).confirm_passwords(password, confirm_password):
             flash('As senhas não são iguais')
             return render_template('register.html',
-                            name=name,
-                            username=username
-            )
+                                   name=name,
+                                   username=username
+                                   )
 
         elif Person(username).find():
             flash('Nome de usuário já existente')
@@ -258,6 +258,46 @@ def create_class_subject():
 
 
 # QUESTIONS #
+@app.route('/edit_question/<question_id>/<cs>/<cc>', methods=['GET', 'POST'])
+def edit_question(question_id, cs, cc):
+    check_if_teacher()
+
+    if request.method == 'POST':
+        title = request.form['question_title']
+        body = request.form['question_body']
+        support_material = request.form['support_material']
+        difficulty = request.form['difficulty']
+        choice_a = request.form['choice_a']
+        choice_b = request.form['choice_b']
+        choice_c = request.form['choice_c']
+        choice_d = request.form['choice_d']
+        right_answer = request.form['right_answer']
+
+        if len(title) < 1:
+            flash('O título da questão deve possuir pelo menos 1 caractere')
+            return redirect(url_for('open_edit_questions', question_id=question_id, cs_title=cs, cc_title=cc))
+
+        else:
+            Question().edit(question_id, title, body, support_material, difficulty, choice_a, choice_b, choice_c,
+                            choice_d, right_answer)
+            flash('Questão alterado com sucesso.')
+            return redirect(url_for('open_questions', cs_title=cs, cc_title=cc))
+
+
+@app.route('/open_edit_questions/<question_id>/<cs_title>/<cc_title>')
+def open_edit_questions(question_id, cs_title, cc_title):
+    check_if_teacher()
+
+    question = Question().get_question(question_id).evaluate()
+
+    return render_template(
+        'edit_question.html',
+        cc=cc_title,
+        cs=cs_title,
+        q=question
+    )
+
+
 @app.route('/open_questions/<cs_title>/<cc_title>')
 def open_questions(cs_title, cc_title):
     check_if_teacher()
@@ -289,8 +329,15 @@ def create_question():
         choice_d = request.form['choice_d']
         right_answer = request.form['right_answer']
 
-        if not Question().create(cc, cs, title, body, support_material, difficulty, choice_a, choice_b, choice_c, choice_d, right_answer,
-                                 session["username"]):
+        if len(title) < 1:
+            flash('O título deve possuir pelo menos 1 caractere')
+        elif len(body) < 1:
+            flash('O enuciado deve possuir pelo menos 1 caractere')
+        elif len(choice_a) < 1:
+            flash('A alternativa A deve possuir pelo menos 1 caractere')
+        elif not Question().create(cc, cs, title, body, support_material, difficulty, choice_a, choice_b, choice_c,
+                                   choice_d, right_answer,
+                                   session["username"]):
             flash('Erro ao cadastrar questão')
         else:
             flash('Questão criada com sucesso.')
@@ -298,15 +345,26 @@ def create_question():
     return redirect(request.referrer)
 
 
-@app.route('/delete_question/<id>')
-def delete_question(id):
+@app.route('/confirm_delete_question/<id>/<cc>/<cs>')
+def confirm_delete_question(id, cc, cs):
     check_if_teacher()
-    if not Question().delete(id):
-        flash('Questão não encontrada')
-    else:
-        flash('Questão excluida com sucesso.')
+    flash('Tem certeza que deseja excluir essa questão?')
 
-    return redirect(request.referrer)
+    return render_template(
+        'confirm_delete_question.html',
+        id=id,
+        cc=cc,
+        cs=cs
+    )
+
+
+@app.route('/delete_question/<id>/<cc>/<cs>')
+def delete_question(id, cc, cs):
+    check_if_teacher()
+    Question().delete(id)
+    flash('Questão excluida com sucesso.')
+
+    return redirect(url_for('open_questions', cs_title=cs, cc_title=cc))
 
 
 # MÉTODOS LEGADOS DO EXEMPLO #

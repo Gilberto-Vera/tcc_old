@@ -14,9 +14,8 @@
     <tr>
     	<td>{{ row.q.title }}</td>
         <td align="center">{{ row.q.difficulty }}</td>
-        <td align="center"><a href="{# url_for('open_questions', title=row.id) #}">Ver questão</a></td>
-        <td align="center"><a href="{# url_for('open_questions', title=row.id) #}">Alterar</a></td>
-        <td align="center"><a href="{{ url_for('delete_question', id=row.q.id) }}">Excluir</a></td>
+        <td align="center"><a href="{{ url_for('open_edit_questions', question_id=row.q.id, cs_title=cs, cc_title=cc) }}">Alterar</a></td>
+        <td align="center"><a href="{{ url_for('confirm_delete_question', id=row.q.id, cc=cc, cs=cs) }}">Excluir</a></td>
     </tr>
   {% else %}
       <tr>

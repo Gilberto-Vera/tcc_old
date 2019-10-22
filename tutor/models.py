@@ -29,7 +29,6 @@ class Person:
         else:
             return False
 
-
     def verify_password(self, password):
         user = self.find()
         if user:
@@ -56,7 +55,7 @@ class Person:
         tags = [x.strip() for x in tags.lower().split(',')]
         for name in set(tags):
             tag = Node("Tag", name=name)
-            #graph.merge(tag, "Tag", "name")
+            # graph.merge(tag, "Tag", "name")
 
             rel = Relationship(tag, 'TAGGED', post)
             graph.create(rel)
@@ -181,9 +180,10 @@ class CourseClass:
         cc = graph.evaluate(query, cc=cc)
         return cc
 
+
 class ClassSubject:
 
-    #método que retorna a quantidade de nós ClassSubject
+    # método que retorna a quantidade de nós ClassSubject
     def find_node_count(self, cc, title):
         query = '''
                     MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject)
@@ -276,7 +276,8 @@ class ClassSubject:
                     SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
                     '''
 
-        if cb == "false" and cb != self.find_class_subject_inicial(title, cc).evaluate() and self.find_node_count(cc, title) > 1:
+        if cb == "false" and cb != self.find_class_subject_inicial(title, cc).evaluate() and self.find_node_count(cc,
+                                                                                                                  title) > 1:
             cb = "true"
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
@@ -402,6 +403,19 @@ class Question:
         graph.merge(Relationship(u, 'CREATED', question))
         return True
 
+    def edit(self, question_id, title, body, support_material, difficulty, choice_a, choice_b, choice_c,
+             choice_d, right_answer):
+        query = '''
+                MATCH (q:Question {id: {question_id}})
+                SET q.title = {title}, q.body = {body}, q.support_material = {support_material}, q.difficulty = 
+                {difficulty}, q.choice_a = {choice_a}, q.choice_b = {choice_b}, q.choice_c = {choice_c}, q.choice_d =
+                {choice_d}, q.right_answer = {right_answer}
+                '''
+        graph.run(query, question_id=question_id, title=title, body=body, support_material=support_material,
+                  difficulty=difficulty, choice_a=choice_a, choice_b=choice_b, choice_c=choice_c, choice_d=choice_d,
+                  right_answer=right_answer)
+        return True
+
     def get_questions(self, cs_title, cc_title):
         query = '''
             MATCH (q:Question)-[:ASKED]->(cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
@@ -412,6 +426,14 @@ class Question:
         question = graph.run(query, cs_title=cs_title, cc_title=cc_title)
         return question
 
+    def get_question(self, question_id):
+        query = '''
+            MATCH (q:Question {id: {question}})
+            RETURN q
+            '''
+        question = graph.run(query, question=question_id)
+        return question
+
     def delete(self, id):
         if self.find(id):
             question = matcher.match("Question", id__exact=id).first()
@@ -419,6 +441,7 @@ class Question:
             return True
         else:
             return False
+
 
 def get_todays_recent_posts():
     query = '''
