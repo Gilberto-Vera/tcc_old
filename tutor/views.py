@@ -140,8 +140,11 @@ def confirm_delete_course_class(title):
 def delete_course_class(title):
     check_if_teacher()
 
-    CourseClass().delete(title)
-    flash('Disciplina excluida com sucesso.')
+    if not CourseClass().find_single_course_class(title):
+        flash('Disciplina com relacionamento, não pode ser exluida.')
+    else:
+        CourseClass().delete(title)
+        flash('Disciplina excluida com sucesso.')
 
     return redirect(url_for('open_course_class'))
 
