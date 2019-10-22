@@ -182,6 +182,17 @@ class CourseClass:
         return cc
 
 class ClassSubject:
+
+    #método que retorna a quantidade de nós ClassSubject
+    def find_node_count(self, cc, title):
+        query = '''
+                    MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject)
+                    OPTIONAL MATCH (cs)<-->(cs {title: {title}})
+                    RETURN count(cs)
+                '''
+        count = graph.evaluate(query, cc=cc, title=title)
+        return count
+
     def find_in_course(self, cc, title):
         query = '''
                    MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
@@ -265,12 +276,15 @@ class ClassSubject:
                     SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
                     '''
 
-        if cb == "false" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
+        if cb == "false" and cb != self.find_class_subject_inicial(title, cc).evaluate() and self.find_node_count(cc, title) > 1:
             cb = "true"
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
-        elif cb == "true" and cb != ClassSubject().find_class_subject_inicial(title, cc).evaluate():
-            ClassSubject().set_class_subject_false(cc)
+        elif cb == "false" and self.find_node_count(cc, title) == 1:
+            graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
+
+        elif cb == "true" and cb != self.find_class_subject_inicial(title, cc).evaluate():
+            self.set_class_subject_false(cc)
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
         else:

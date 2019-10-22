@@ -226,7 +226,7 @@ def delete_class_subject(cs_title, cc_title):
     check_if_teacher()
 
     if not ClassSubject().find_single_class_subject(cs_title, cc_title):
-        flash('Assunto possui relacionamento, não pode ser exluida.')
+        flash('Assunto possui questões, não pode ser exluida.')
     elif not ClassSubject().find_inicial(cs_title, cc_title):
         flash('Assunto inicial, não pode ser exluida.')
     else:
