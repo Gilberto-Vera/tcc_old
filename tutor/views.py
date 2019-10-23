@@ -226,12 +226,12 @@ def delete_class_subject(cs_title, cc_title):
     check_if_teacher()
 
     if not ClassSubject().find_single_class_subject(cs_title, cc_title):
-        flash('Assunto possui questões, não pode ser exluida.')
+        flash('Assunto possui questões, não pode ser excluído.')
     elif not ClassSubject().find_inicial(cs_title, cc_title):
-        flash('Assunto inicial, não pode ser exluida.')
+        flash('Assunto inicial, não pode ser excluído.')
     else:
         ClassSubject().delete(cs_title, cc_title)
-        flash('Assunto excluido com sucesso.')
+        flash('Assunto excluído com sucesso.')
 
     return redirect(url_for('open_class_subject', title=cc_title))
 

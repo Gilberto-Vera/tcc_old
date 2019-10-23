@@ -117,30 +117,17 @@ class CourseClass:
         else:
             return False
 
-    def create_relationship_course_class_previous(self, cc, title, ps):
-        query = '''
-                MATCH (cc:CourseClass)<-->(cs:ClassSubject), (cc:CourseClass)<-->(cs1:ClassSubject)
-                WHERE (cc.title = {cc}) AND (cs.title = {title}) AND (cs1.title = {ps})
-                CREATE (cs)-[r:PREVIOUS]->(cs1)
-                '''
-        graph.run(query, cc=cc, title=title, ps=ps)
-
-    def create_relationship_course_class_forward(self, cc, title, ns):
-        query = '''
-                MATCH (cc:CourseClass)<-->(cs:ClassSubject), (cc:CourseClass)<-->(cs1:ClassSubject)
-                WHERE (cc.title = {cc}) AND (cs.title = {title}) AND (cs1.title = {ns})
-                CREATE (cs)-[r:FORWARD]->(cs1)
-                '''
-        graph.run(query, cc=cc, title=title, ns=ns)
-
     def edit(self, title, cc):
-        query = '''
-                    MATCH (cc:CourseClass {title: {cc}})
-                    SET cc.title = {title}
-                    RETURN cc
-                    '''
-        graph.run(query, title=title, cc=cc)
-        return True
+        if not self.find(title):
+            query = '''
+                        MATCH (cc:CourseClass {title: {cc}})
+                        SET cc.title = {title}
+                        RETURN cc
+                        '''
+            graph.run(query, title=title, cc=cc)
+            return True
+        else:
+            return False
 
     def delete(self, title):
         if self.find(title):
@@ -149,22 +136,6 @@ class CourseClass:
             return True
         else:
             return False
-
-    def delete_previous_course_class(self, cc, title):
-        query = '''
-                MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
-                OPTIONAL MATCH (cs)-[r:PREVIOUS]->(ps:ClassSubject)
-                DELETE r
-                '''
-        graph.run(query, cc=cc, title=title)
-
-    def delete_forward_course_class(self, cc, title):
-        query = '''
-                MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
-                OPTIONAL MATCH (cs)-[r:FORWARD]->(ps:ClassSubject)
-                DELETE r
-                '''
-        graph.run(query, cc=cc, title=title)
 
     def get_course_classes(self):
         cc = matcher.match("CourseClass").order_by("_.title")
@@ -292,20 +263,52 @@ class ClassSubject:
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
         if ps:
-            CourseClass().delete_previous_course_class(cc, title)
-            CourseClass().create_relationship_course_class_previous(cc, title, ps)
+            self.delete_previous_course_class(cc, title)
+            self.create_relationship_course_class_previous(cc, title, ps)
 
         if ns:
-            CourseClass().delete_forward_course_class(cc, title)
-            CourseClass().create_relationship_course_class_forward(cc, title, ns)
+            self.delete_forward_course_class(cc, title)
+            self.create_relationship_course_class_forward(cc, title, ns)
 
         if not ps:
-            CourseClass().delete_previous_course_class(cc, title)
+            self.delete_previous_course_class(cc, title)
 
         if not ns:
-            CourseClass().delete_forward_course_class(cc, title)
+            self.delete_forward_course_class(cc, title)
 
         return True
+
+    def delete_previous_course_class(self, cc, title):
+        query = '''
+                MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
+                OPTIONAL MATCH (cs)-[r:PREVIOUS]->(ps:ClassSubject)
+                DELETE r
+                '''
+        graph.run(query, cc=cc, title=title)
+
+    def delete_forward_course_class(self, cc, title):
+        query = '''
+                MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
+                OPTIONAL MATCH (cs)-[r:FORWARD]->(ps:ClassSubject)
+                DELETE r
+                '''
+        graph.run(query, cc=cc, title=title)
+
+    def create_relationship_course_class_previous(self, cc, title, ps):
+        query = '''
+                MATCH (cc:CourseClass)<-->(cs:ClassSubject), (cc:CourseClass)<-->(cs1:ClassSubject)
+                WHERE (cc.title = {cc}) AND (cs.title = {title}) AND (cs1.title = {ps})
+                CREATE (cs)-[r:PREVIOUS]->(cs1)
+                '''
+        graph.run(query, cc=cc, title=title, ps=ps)
+
+    def create_relationship_course_class_forward(self, cc, title, ns):
+        query = '''
+                MATCH (cc:CourseClass)<-->(cs:ClassSubject), (cc:CourseClass)<-->(cs1:ClassSubject)
+                WHERE (cc.title = {cc}) AND (cs.title = {title}) AND (cs1.title = {ns})
+                CREATE (cs)-[r:FORWARD]->(cs1)
+                '''
+        graph.run(query, cc=cc, title=title, ns=ns)
 
     def set_class_subject_false(self, cc):
         query = '''
