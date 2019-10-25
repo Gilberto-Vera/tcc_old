@@ -108,6 +108,18 @@ def open_course_class():
     )
 
 
+@app.route('/open_course_class_student')
+def open_course_class_student():
+    check_if_student()
+
+    course_classes = CourseClass().get_course_classes()
+    return render_template(
+        'course_class_student.html',
+        cc=course_classes
+    )
+
+
+
 @app.route('/create_course_class', methods=['GET', 'POST'])
 def create_course_class():
     check_if_teacher()
