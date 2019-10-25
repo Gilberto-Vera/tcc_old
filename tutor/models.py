@@ -14,9 +14,9 @@ class Person:
         user = matcher.match("Person", username__exact=self.username).first()
         return user
 
-    def register(self, name, password, type):
+    def register(self, name, password, p_type):
         if not self.find():
-            user = Node("Person", name=name, username=self.username, password=password, type=type)
+            user = Node("Person", name=name, username=self.username, password=password, type=p_type)
             graph.create(user)
             return True
         else:

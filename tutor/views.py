@@ -20,7 +20,7 @@ def register():
         username = request.form['username']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
-        type = "student"
+        p_type = "student"
 
         if not Person(username).confirm_passwords(password, confirm_password):
             flash('As senhas não são iguais')
@@ -36,7 +36,8 @@ def register():
         else:
             session['username'] = username
             session['name'] = name
-            session['type'] = "student"
+            session['type'] = p_type
+            Person(username).register(name, password, p_type)
             flash('Cadastro efetuado com sucesso.')
             return redirect(url_for('login'))
 
@@ -435,4 +436,12 @@ def check_if_teacher():
 
     if not username and t != 'teacher':
         flash('Você não está logado como professor.')
+        return redirect(url_for('login'))
+
+def check_if_student():
+    username = session.get('username')
+    t = session.get('type')
+
+    if not username and t != 'student':
+        flash('Você não está logado como aluno.')
         return redirect(url_for('login'))
