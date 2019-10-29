@@ -5,12 +5,6 @@
     <h2>Olá, {{ 'Professor' if session.type == 'teacher' else 'Aluno' }}</h2>
     <h3>Utilize os menus acima para executar funções</h3>
 
-      {% if session.type == 'student' %}
-          <h4>Lista de disciplinas que estou matriculado</h4>
-          {#% include "display_course_classses" %#}
-
-          <h4>Lista de todas as disciplinas disponíveis para matricular</h4>
-      {% endif %}
   {% else %}
     <h2>Olá, Visitante</h2>
     <h3>Por favor, realize o login</h3>

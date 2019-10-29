@@ -58,7 +58,7 @@ def login():
             session['type'] = user['type']
             session['person_name'] = user['name']
             flash('Login efetuado com sucesso.')
-            return redirect(url_for('index'))
+            return render_template('index.html')
 
     return render_template('login.html')
 
@@ -71,6 +71,17 @@ def logout():
 
 
 # COURSE CLASS #
+@app.route('/enrollment_course_class/<cc>/<user>')
+def enrollment_course_class(cc, user):
+    check_if_student()
+    if not CourseClass().enrollment(cc, user):
+        flash('Erro ao matricular-se Disciplina')
+    else:
+        flash('Matrícula realizada com sucesso.')
+
+    return redirect(url_for('open_course_class_student'))
+
+
 @app.route('/edit_course_class', methods=['GET', 'POST'])
 def edit_course_class():
     check_if_teacher()
@@ -108,16 +119,18 @@ def open_course_class():
     )
 
 
-@app.route('/open_course_class_student')
-def open_course_class_student():
+@app.route('/open_course_class_student/<user>')
+def open_course_class_student(user):
     check_if_student()
 
     course_classes = CourseClass().get_course_classes()
+    student_course_classes = list(CourseClass().get_student_course_classes(user))
+    print(course_classes, '\n', student_course_classes)
     return render_template(
         'course_class_student.html',
-        cc=course_classes
+        cc=course_classes,
+        scc=student_course_classes
     )
-
 
 
 @app.route('/create_course_class', methods=['GET', 'POST'])

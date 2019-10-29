@@ -105,6 +105,16 @@ class Person:
 
 
 class CourseClass:
+    def enrollment(self, title, user):
+
+        cc = self.find(title)
+        username = Person(user).find()
+
+        if not graph.merge(Relationship(username, 'LEARN', cc)):
+            return True
+        else:
+            return False
+
     def find(self, title):
         cc = matcher.match("CourseClass", title__exact=title).first()
         return cc
@@ -136,6 +146,14 @@ class CourseClass:
             return True
         else:
             return False
+
+    def get_student_course_classes(self, user):
+        query = '''
+                MATCH (p:Person {username: {user}})-[r:LEARN]->(cc)
+                RETURN cc
+                '''
+        scc = graph.run(query, user=user)
+        return scc
 
     def get_course_classes(self):
         cc = matcher.match("CourseClass").order_by("_.title")

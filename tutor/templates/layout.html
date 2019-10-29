@@ -16,7 +16,7 @@
             {% if session.type == 'teacher' %}
                 <a href="{{ url_for('open_course_class') }}" class="session" >Disciplina</a>
             {% else %}
-                <a href="{{ url_for('open_course_class_student') }}" class="session" >Matricular</a>
+                <a href="{{ url_for('open_course_class_student', user=session.username) }}" class="session" >Disciplina</a>
             {% endif %}
             <a href="{{ url_for('logout') }}" class="session" >Sair</a>
         {% endif %}
