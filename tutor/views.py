@@ -58,6 +58,11 @@ def login():
             session['type'] = user['type']
             session['person_name'] = user['name']
             flash('Login efetuado com sucesso.')
+
+            # if user['type'] == 'student':
+            # chamar funções das duas listas
+            # return render_template('index.html, param=param)
+
             return render_template('index.html')
 
     return render_template('login.html')
@@ -79,7 +84,8 @@ def enrollment_course_class(cc, user):
     else:
         flash('Matrícula realizada com sucesso.')
 
-    return redirect(url_for('open_course_class_student'))
+    return redirect(url_for('open_course_class_student',
+                            user=user))
 
 
 @app.route('/edit_course_class', methods=['GET', 'POST'])
@@ -123,12 +129,11 @@ def open_course_class():
 def open_course_class_student(user):
     check_if_student()
 
-    course_classes = CourseClass().get_course_classes()
     student_course_classes = list(CourseClass().get_student_course_classes(user))
-    print(course_classes, '\n', student_course_classes)
+    no_student_course_classes = list(CourseClass().get_no_student_course_classes(user))
     return render_template(
         'course_class_student.html',
-        cc=course_classes,
+        nscc=no_student_course_classes,
         scc=student_course_classes
     )
 
@@ -462,6 +467,7 @@ def check_if_teacher():
     if not username and t != 'teacher':
         flash('Você não está logado como professor.')
         return redirect(url_for('login'))
+
 
 def check_if_student():
     username = session.get('username')

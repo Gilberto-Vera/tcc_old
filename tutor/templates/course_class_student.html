@@ -1,38 +1,61 @@
-{% extends "layout.html" %}
-{% block body %}
+    {% extends "layout.html" %}
+    {% block body %}
 
-    {% if session.username %}
-    <h2>Disciplina</h2>
+        <h2>Disciplinas Matriculadas</h2>
 
-    <table border="1" class="posts" name="course_class">
-        <thead>
+        {% if session.username and scc != null %}
+            <table border="1" class="posts" name="course_class">
+            <thead>
+                <tr>
+{#                    <caption><h3>Lista de Disciplinas Matriculadas</h3></caption>#}
+                    <th align="center">Título</th>
+                    <th colspan="2" >Gerenciamento</th>
+                </tr>
+            </thead>
+
+            {% for row in scc %}
+                <tr>
+                    <td>{{ row.cc.title }}</td>
+                    <td align="center"><a href="{{ url_for('open_class_subject', title=row.title) }}"> Ver Assuntos da Disciplina </a></td>
+                    <td align="center"><a href="{#{{ url_for('open_class_subject', title=row.title) }}#}"> Estudar </a></td>
+                </tr>
+            {% endfor %}
+
+            {% else %}
             <tr>
-                <caption><h3>Lista de Disciplinas</h3></caption>
-                <th align="center">Título</th>
-                <th colspan="2" >Gerenciamento</th>
+                <td colspan="3">Nenhuma disciplina cadastrada ainda!!!</td>
             </tr>
-        </thead>
+        </table>
 
-        {% for row in cc %}
+        {% endif %}
+
+
+        {% if session.username and nscc != null %}
+        <table border="1" class="posts" name="course_class">
+            <h2>Disciplinas Disponíveis</h2>
+            <thead>
+                <tr>
+{#                    <caption><h3>Lista de Disciplinas Disponíveis</h3></caption>#}
+                    <th align="center">Título</th>
+                    <th colspan="2" >Gerenciamento</th>
+                </tr>
+            </thead>
+
+            {% for row in nscc %}
+                <tr>
+                    <td>{{ row.cc.title }}</td>
+                    <td align="center"><a href="{{ url_for('open_class_subject', title=row.title) }}"> Ver Assuntos da Disciplina </a></td>
+                    <td align="center"><a href="{{ url_for('enrollment_course_class', cc=row.cc.title, user=session.username) }}"> Matricular </a></td>
+                </tr>
+            {% endfor %}
+
+            {% else %}
             <tr>
-                <td>{{ row.title }}</td>
-                <td align="center"><a href="{{ url_for('open_class_subject', title=row.title) }}"> Ver Assuntos da Disciplina </a></td>
-                {% for row1 in scc %}
-                    {% if row.title == row1.cc.title %}
-                        <td align="center"><a href="{#{{ url_for('open_class_subject', title=row.title) }}#}"> Estudar </a></td>
-                    {% else %}
-                        <td align="center"><a href="{{ url_for('enrollment_course_class', cc=row.title, user=session.username) }}"> Matricular </a></td>
-                    {% endif %}
-                {% endfor %}
-        {% endfor %}
+                <td colspan="3">Nenhuma disciplina cadastrada ainda!!!</td>
+            </tr>
+        </table>
 
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="3">Nenhuma disciplina cadastrada ainda!!!</td>
-        </tr>
-    </table>
+        {% endif %}
 
-    {% endif %}
 
-{% endblock %}
+    {% endblock %}

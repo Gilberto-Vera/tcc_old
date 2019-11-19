@@ -155,6 +155,16 @@ class CourseClass:
         scc = graph.run(query, user=user)
         return scc
 
+    def get_no_student_course_classes(self, user):
+        query = '''
+                MATCH (p:Person {username: {user}})
+                OPTIONAL MATCH (cc:CourseClass)
+                WHERE NOT (p)<-->(cc)
+                RETURN cc
+                '''
+        nscc = graph.run(query, user=user)
+        return nscc
+
     def get_course_classes(self):
         cc = matcher.match("CourseClass").order_by("_.title")
         return cc
