@@ -107,10 +107,17 @@ class Person:
 class CourseClass:
     def enrollment(self, title, user):
 
-        cc = self.find(title)
+        cc = tuple(self.find(title))
         username = Person(user).find()
+        print(cc, type(cc))
 
-        if not graph.merge(Relationship(username, 'LEARN', cc)):
+        if not Person.find():
+            question_answered = None
+            question = None
+            a = Node("Answer", date=datetime(), question_answered=question_answered)
+            graph.create(a)
+            graph.merge(Relationship(username, 'HISTORIC', a))
+            graph.merge(Relationship(a, 'BOND', question))
             return True
         else:
             return False
@@ -152,7 +159,7 @@ class CourseClass:
                 MATCH (p:Person {username: {user}})-[r:LEARN]->(cc)
                 RETURN cc
                 '''
-        scc = graph.run(query, user=user)
+        scc = list(graph.run(query, user=user))
         return scc
 
     def get_no_student_course_classes(self, user):
@@ -162,7 +169,7 @@ class CourseClass:
                 WHERE NOT (p)<-->(cc)
                 RETURN cc
                 '''
-        nscc = graph.run(query, user=user)
+        nscc = list(graph.run(query, user=user))
         return nscc
 
     def get_course_classes(self):
@@ -464,6 +471,22 @@ class Question:
             '''
         question = graph.run(query, question=question_id)
         return question
+
+    def get_random_question(self):
+        question_id = self.random_question()
+        query = '''
+            MATCH (q:Question {id: {question}})
+            RETURN q
+            '''
+        question = graph.run(query, question=question_id)
+        return question
+
+    def random_question(self):
+        query = '''
+        
+        '''
+        rq = graph.run(query)
+        return rq
 
     def delete(self, id):
         if self.find(id):

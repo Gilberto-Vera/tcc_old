@@ -15,7 +15,7 @@
                 <td><a href="{{ url_for('confirm_delete_course_class', title=row.title) }}"> Excluir </a></td>
                 <td><a href="{{ url_for('open_class_subject', title=row.title) }}"> Ver Assuntos da Disciplina </a></td>
             </tr>
-            {% else %}
+        {% else %}
             <tr>
                 <td colspan="4">Nenhuma disciplina cadastrada ainda!!!</td>
             </tr>

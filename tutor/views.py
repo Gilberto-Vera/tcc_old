@@ -129,12 +129,13 @@ def open_course_class():
 def open_course_class_student(user):
     check_if_student()
 
-    student_course_classes = list(CourseClass().get_student_course_classes(user))
-    no_student_course_classes = list(CourseClass().get_no_student_course_classes(user))
+    student_course_classes = CourseClass().get_student_course_classes(user)
+    no_student_course_classes = CourseClass().get_no_student_course_classes(user)
+
     return render_template(
         'course_class_student.html',
-        nscc=no_student_course_classes,
-        scc=student_course_classes
+        scc=student_course_classes,
+        nscc=no_student_course_classes
     )
 
 
