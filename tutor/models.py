@@ -106,9 +106,9 @@ class Person:
 
 class CourseClass:
 
-    # Faz as ligações necessárias para matricular o aluno em uma Disciplina
+    # Faz as ligações necessárias para matricular o aluno a uma Disciplina
     def enrollment(self, title, user):
-        cs_id = None
+        cs_id_initial = None
 
         username = Person(user).find()
 
@@ -283,9 +283,8 @@ class ClassSubject:
                     WHERE (cc)<-->(cs)
                     SET cs.title = {st}, cs.support_material = {sm}, cs.initial = {cb}
                     '''
-        print(self.find_class_subject_initial(title, cc))
 
-        if cb == "False" and cb != self.find_class_subject_initial(title, cc).evaluate() and \
+        if cb == "False" and cb != self.get_initial_value(title, cc) and \
                 self.find_node_count(cc, title) > 1:
             cb = "True"
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
@@ -293,7 +292,7 @@ class ClassSubject:
         elif cb == "False" and self.find_node_count(cc, title) == 1:
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
-        elif cb == "True" and cb != self.find_class_subject_initial(title, cc).evaluate():
+        elif cb == "True" and cb != self.get_initial_value(title, cc):
             self.set_class_subject_False(cc)
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
@@ -355,16 +354,6 @@ class ClassSubject:
                 SET cs.initial = "False"
                 '''
         graph.run(query, cc=cc)
-
-    def find_class_subject_initial(self, title, cc):
-        query = '''
-                MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-                WHERE cc.title = {cc} AND cs.title = {title}
-                RETURN cs.initial
-                '''
-
-        initial = graph.run(query, title=title, cc=cc)
-        return initial
 
     def get_class_subjects(self, title):
         query = '''
