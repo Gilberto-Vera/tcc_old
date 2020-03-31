@@ -105,15 +105,16 @@ class Person:
 
 
 class CourseClass:
+
+    # Faz as ligações necessárias para matricular o aluno em uma Disciplina
     def enrollment(self, title, user):
+        cs_id = None
 
-        cc = tuple(self.find(title))
         username = Person(user).find()
-        print(cc, type(cc))
 
-        if not Person.find():
+        if not Person(user).find():
             question_answered = None
-            question = None
+            question = Question().get_random_question(title)
             a = Node("Answer", date=datetime(), question_answered=question_answered)
             graph.create(a)
             graph.merge(Relationship(username, 'HISTORIC', a))
@@ -209,18 +210,19 @@ class ClassSubject:
         cc = graph.run(query, cc=cc, title=title)
         return cc
 
-    def find_inicial_value(self, title, cc):
+    # Retorna o valor do campo 'initial' de um Assunto específco através do título da Disciplina e do título do Assunto
+    def get_initial_value(self, title, cc):
         query = '''
                    MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
                    WHERE cc.title = {cc} AND cs.title = {title}
-                   RETURN cs.inicial
+                   RETURN cs.initial
                    '''
         return graph.evaluate(query, title=title, cc=cc)
 
-    def find_inicial(self, title, cc):
+    def get_initial(self, title, cc):
         query = '''
                    MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject {title: {title}})
-                   WHERE NOT cs.inicial = "true"
+                   WHERE NOT cs.initial = "True"
                    RETURN cs
                    '''
         cs = graph.evaluate(query, title=title, cc=cc)
@@ -254,9 +256,9 @@ class ClassSubject:
             fscc = CourseClass().find_single_course_class(course_class)
 
             if fscc:
-                cs = Node("ClassSubject", title=title, inicial="true", support_material=support_material)
+                cs = Node("ClassSubject", title=title, initial="True", support_material=support_material)
             else:
-                cs = Node("ClassSubject", title=title, inicial="false", support_material=support_material)
+                cs = Node("ClassSubject", title=title, initial="False", support_material=support_material)
 
             graph.create(cs)
 
@@ -279,19 +281,20 @@ class ClassSubject:
                     MATCH (cc:CourseClass {title: {cc}})
                     OPTIONAL MATCH (cs:ClassSubject {title:{title}})
                     WHERE (cc)<-->(cs)
-                    SET cs.title = {st}, cs.support_material = {sm}, cs.inicial = {cb}
+                    SET cs.title = {st}, cs.support_material = {sm}, cs.initial = {cb}
                     '''
+        print(self.find_class_subject_initial(title, cc))
 
-        if cb == "false" and cb != self.find_class_subject_inicial(title, cc).evaluate() and self.find_node_count(cc,
-                                                                                                                  title) > 1:
-            cb = "true"
+        if cb == "False" and cb != self.find_class_subject_initial(title, cc).evaluate() and \
+                self.find_node_count(cc, title) > 1:
+            cb = "True"
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
-        elif cb == "false" and self.find_node_count(cc, title) == 1:
+        elif cb == "False" and self.find_node_count(cc, title) == 1:
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
-        elif cb == "true" and cb != self.find_class_subject_inicial(title, cc).evaluate():
-            self.set_class_subject_false(cc)
+        elif cb == "True" and cb != self.find_class_subject_initial(title, cc).evaluate():
+            self.set_class_subject_False(cc)
             graph.run(query, title=title, cc=cc, st=st, sm=sm, cb=cb)
 
         else:
@@ -345,23 +348,23 @@ class ClassSubject:
                 '''
         graph.run(query, cc=cc, title=title, ns=ns)
 
-    def set_class_subject_false(self, cc):
+    def set_class_subject_False(self, cc):
         query = '''
                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-                WHERE cc.title = {cc} AND cs.inicial = "true"
-                SET cs.inicial = "false"
+                WHERE cc.title = {cc} AND cs.initial = "True"
+                SET cs.initial = "False"
                 '''
         graph.run(query, cc=cc)
 
-    def find_class_subject_inicial(self, title, cc):
+    def find_class_subject_initial(self, title, cc):
         query = '''
                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
                 WHERE cc.title = {cc} AND cs.title = {title}
-                RETURN cs.inicial
+                RETURN cs.initial
                 '''
 
-        inicial = graph.run(query, title=title, cc=cc)
-        return inicial
+        initial = graph.run(query, title=title, cc=cc)
+        return initial
 
     def get_class_subjects(self, title):
         query = '''
@@ -382,6 +385,17 @@ class ClassSubject:
 
         cc = graph.run(query, title=title)
         return cc
+
+    # Retorna o id do Assunto initial da Disciplina
+    def get_id_class_subjects(self, cc_title):
+        query = '''
+                MATCH (cc:CourseClass)<--(cs:ClassSubject {title: 'cc_title'})
+                RETURN id(cs)
+                '''
+
+
+        cs_id = graph.run(query, title=cc_title)
+        return cs_id
 
     def get_class_subjects_with_previous_and_forward(self, title):
         query = '''
@@ -411,10 +425,13 @@ class ClassSubject:
 
 
 class Question:
+
+    # Retorna uma questão através do id (NÃO ESTA SENDO USADO)
     def find(self, id):
         question = matcher.match("Question", id__exact=id).first()
         return question
 
+    # Cria uma questão
     def create(self, cc, class_subject, title, body, support_material, difficulty, choice_a, choice_b, choice_c,
                choice_d, right_answer, user):
         cs = ClassSubject().find_in_course(cc, class_subject).evaluate()
@@ -441,6 +458,7 @@ class Question:
         graph.merge(Relationship(u, 'CREATED', question))
         return True
 
+    # Edita uma questão através do id
     def edit(self, question_id, title, body, support_material, difficulty, choice_a, choice_b, choice_c,
              choice_d, right_answer):
         query = '''
@@ -454,6 +472,7 @@ class Question:
                   right_answer=right_answer)
         return True
 
+    # Retorna uma questão atráves do título da Disciplina e do título do Assunto
     def get_questions(self, cs_title, cc_title):
         query = '''
             MATCH (q:Question)-[:ASKED]->(cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
@@ -464,15 +483,18 @@ class Question:
         question = graph.run(query, cs_title=cs_title, cc_title=cc_title)
         return question
 
+    # Returna uma questão através do id
     def get_question(self, question_id):
         query = '''
-            MATCH (q:Question {id: {question}})
+            MATCH (q:Question {id: {question_id}})
             RETURN q
             '''
         question = graph.run(query, question=question_id)
         return question
 
-    def get_random_question(self):
+    # Returna uma questão aleatória de um Assunto específico
+    def get_random_question(self, cc_title):
+
         question_id = self.random_question()
         query = '''
             MATCH (q:Question {id: {question}})
@@ -481,13 +503,15 @@ class Question:
         question = graph.run(query, question=question_id)
         return question
 
-    def random_question(self):
+    # Retorna o número de questões de um Assunto específico
+    def count_questions(self, cs_id):
         query = '''
-        
-        '''
-        rq = graph.run(query)
-        return rq
+            MATCH (cc:CourseClass {title: 'Disciplina 0'})<--(cs:ClassSubject {title: 'Assunto 0'})<--(q:Question)
+            RETURN count(q)
+            '''
+        return None
 
+    # Exclui uma questão
     def delete(self, id):
         if self.find(id):
             question = matcher.match("Question", id__exact=id).first()
@@ -496,7 +520,7 @@ class Question:
         else:
             return False
 
-
+# Funcões legadas
 def get_todays_recent_posts():
     query = '''
     MATCH (user:Person)-[:PUBLISHED]->(post:Post)<-[:TAGGED]-(tag:Tag)

@@ -193,7 +193,7 @@ def edit_class_subject():
         ps = request.form['previous_subject']
         ns = request.form['next_subject']
         sm = request.form['support_material']
-        cb = request.form['checkbox_inicial']
+        cb = request.form['checkbox_initial']
 
         if not ClassSubject().edit(st, title, cc, ps, ns, sm, cb):
             flash('Erro ao alterar assunto')
@@ -210,7 +210,7 @@ def open_edit_class_subject(title, cc):
     class_subjects = list(ClassSubject().get_class_subjects_and_course_class(cc))
 
     cs = ClassSubject().find_in_course(cc, title)
-    ini = ClassSubject().find_inicial_value(title, cc)
+    ini = ClassSubject().get_initial_value(title, cc)
 
     ps = ClassSubject().find_previous(title, cc)
     ns = ClassSubject().find_next(title, cc)
@@ -223,7 +223,7 @@ def open_edit_class_subject(title, cc):
         ns=ns,
         cs=class_subjects,
         support_material=cs.evaluate()["support_material"],
-        inicial=ini
+        initial=ini
     )
 
 
@@ -259,7 +259,7 @@ def delete_class_subject(cs_title, cc_title):
 
     if not ClassSubject().find_single_class_subject(cs_title, cc_title):
         flash('Assunto possui questões, não pode ser excluído.')
-    elif not ClassSubject().find_inicial(cs_title, cc_title):
+    elif not ClassSubject().get_initial_value(cs_title, cc_title):
         flash('Assunto inicial, não pode ser excluído.')
     else:
         ClassSubject().delete(cs_title, cc_title)
