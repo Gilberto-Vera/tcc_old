@@ -72,7 +72,6 @@ class Person:
         RETURN post, COLLECT(tag.name) AS tags
         ORDER BY post.timestamp DESC LIMIT 5
         '''
-
         return graph.run(query, username=self.username)
 
     def get_similar_users(self):
@@ -106,16 +105,14 @@ class Person:
 
 class CourseClass:
 
-    # Faz as ligações necessárias para matricular o aluno a uma Disciplina
+    # Cria o nó "Answer" e faz as ligações necessárias para matricular o aluno a uma Disciplina
     def enrollment(self, title, user):
-        cs_id_initial = None
-
         username = Person(user).find()
 
-        if not Person(user).find():
-            question_answered = None
+        if self.find(title):
+            question_answered = ""
             question = Question().get_random_question(title)
-            a = Node("Answer", date=datetime(), question_answered=question_answered)
+            a = Node("Answer", date=date(), question_answered=question_answered)
             graph.create(a)
             graph.merge(Relationship(username, 'HISTORIC', a))
             graph.merge(Relationship(a, 'BOND', question))
@@ -136,6 +133,7 @@ class CourseClass:
             return False
 
     def edit(self, title, cc):
+
         if not self.find(title):
             query = '''
                         MATCH (cc:CourseClass {title: {cc}})
@@ -218,6 +216,15 @@ class ClassSubject:
                    RETURN cs.initial
                    '''
         return graph.evaluate(query, title=title, cc=cc)
+
+    # Retorna o valor do campo 'initial' de um Assunto específco através do título da Disciplina e do título do Assunto
+    def get_initial_id(self, cc_title):
+        query = '''
+                   MATCH (cc:CourseClass {title: {cc}})<-[:TAUGHT]-(cs:ClassSubject)
+                   WHERE cs.initial = "True"
+                   RETURN id(cs)
+                   '''
+        return graph.evaluate(query, cc=cc_title)
 
     def get_initial(self, title, cc):
         query = '''
@@ -472,7 +479,7 @@ class Question:
         question = graph.run(query, cs_title=cs_title, cc_title=cc_title)
         return question
 
-    # Returna uma questão através do id
+    # Retorna uma questão através do id
     def get_question(self, question_id):
         query = '''
             MATCH (q:Question {id: {question_id}})
@@ -481,24 +488,19 @@ class Question:
         question = graph.run(query, question=question_id)
         return question
 
-    # Returna uma questão aleatória de um Assunto específico
+    # Retorna uma questão aleatória de um Assunto específico
     def get_random_question(self, cc_title):
+        cs_id_initial = ClassSubject().get_initial_id(cc_title)
 
-        question_id = self.random_question()
         query = '''
-            MATCH (q:Question {id: {question}})
-            RETURN q
+                MATCH (cs:ClassSubject)<-[:ASKED]-(q:Question)
+                WHERE id(cs) = {cs_id}
+                WITH q, rand() as rand
+                ORDER BY rand LIMIT 1
+                RETURN id(q)
             '''
-        question = graph.run(query, question=question_id)
-        return question
-
-    # Retorna o número de questões de um Assunto específico
-    def count_questions(self, cs_id):
-        query = '''
-            MATCH (cc:CourseClass {title: 'Disciplina 0'})<--(cs:ClassSubject {title: 'Assunto 0'})<--(q:Question)
-            RETURN count(q)
-            '''
-        return None
+        id = graph.run(query, cs_id=cs_id_initial).evaluate()
+        return matcher.get(id)
 
     # Exclui uma questão
     def delete(self, id):
