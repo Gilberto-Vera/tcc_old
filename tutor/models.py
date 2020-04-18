@@ -155,7 +155,7 @@ class CourseClass:
 
     def get_student_course_classes(self, user):
         query = '''
-                MATCH (p:Person {username: {user}})-[r:LEARN]->(cc)
+                MATCH (p:Person {username: {user}})-->()-->()-->()-->(cc:CourseClass)
                 RETURN cc
                 '''
         scc = list(graph.run(query, user=user))
@@ -165,7 +165,7 @@ class CourseClass:
         query = '''
                 MATCH (p:Person {username: {user}})
                 OPTIONAL MATCH (cc:CourseClass)
-                WHERE NOT (p)<-->(cc)
+                WHERE NOT (p)-->()-->()-->()-->(cc)
                 RETURN cc
                 '''
         nscc = list(graph.run(query, user=user))
@@ -188,7 +188,7 @@ class CourseClass:
 
 class ClassSubject:
 
-    # método que retorna a quantidade de nós ClassSubject
+# método que retorna a quantidade de nós ClassSubject
     def find_node_count(self, cc, title):
         query = '''
                     MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject)
@@ -208,7 +208,16 @@ class ClassSubject:
         cc = graph.run(query, cc=cc, title=title)
         return cc
 
-    # Retorna o valor do campo 'initial' de um Assunto específco através do título da Disciplina e do título do Assunto
+    def get_class_subject_current_question(self, cc_title, user):
+        query = '''
+                MATCH (p:Person)-->(a:Answer)-->()-->(cs:ClassSubject)-->(cc:CourseClass {title: {cc_title}})
+                WHERE a.question_answered = "" AND p.username = {user}
+                RETURN cs
+               '''
+        cs = graph.run(query, cc_title=cc_title, user=user)
+        return cs
+
+# Retorna o valor do campo 'initial' de um Assunto específco através do título da Disciplina e do título do Assunto
     def get_initial_value(self, title, cc):
         query = '''
                    MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
@@ -217,7 +226,7 @@ class ClassSubject:
                    '''
         return graph.evaluate(query, title=title, cc=cc)
 
-    # Retorna o valor do campo 'initial' de um Assunto específco através do título da Disciplina e do título do Assunto
+# Retorna o valor do campo 'initial' de um Assunto específco através do título da Disciplina e do título do Assunto
     def get_initial_id(self, cc_title):
         query = '''
                    MATCH (cc:CourseClass {title: {cc}})<-[:TAUGHT]-(cs:ClassSubject)
@@ -245,7 +254,7 @@ class ClassSubject:
         c:ClassSubject) return c.title '''
         return graph.evaluate(query, title=title, cc=cc)
 
-    # método que verifica se o assunto não tem nenhum relacionamento com uma questão
+# Retorna o nó de um Assunto através do título do Assunto e do título da Disciplina
     def find_single_class_subject(self, title, cc_title):
         query = '''
                  MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject {title: {title}})
@@ -502,6 +511,17 @@ class Question:
         id = graph.run(query, cs_id=cs_id_initial).evaluate()
         return matcher.get(id)
 
+    # Retorna a questão atual, não respondida, de uma Disciplina
+    def get_current_question(self, cc_title, user):
+
+        query = '''
+                MATCH (p:Person)-->(a:Answer)-->(q:Question)-->()-->(cc:CourseClass {title: {cc_title}})
+                WHERE a.question_answered = "" AND p.username = {user}
+                RETURN q
+            '''
+        question = graph.run(query, cc_title=cc_title, user=user)
+        return question
+
     # Exclui uma questão
     def delete(self, id):
         if self.find(id):
@@ -514,11 +534,11 @@ class Question:
 # Funcões legadas
 def get_todays_recent_posts():
     query = '''
-    MATCH (user:Person)-[:PUBLISHED]->(post:Post)<-[:TAGGED]-(tag:Tag)
-    WHERE post.date = {today}
-    RETURN user.username AS username, post, COLLECT(tag.name) AS tags
-    ORDER BY post.timestamp DESC LIMIT 5
-    '''
+        MATCH (user:Person)-[:PUBLISHED]->(post:Post)<-[:TAGGED]-(tag:Tag)
+        WHERE post.date = {today}
+        RETURN user.username AS username, post, COLLECT(tag.name) AS tags
+        ORDER BY post.timestamp DESC LIMIT 5
+        '''
 
     return graph.run(query, today=date())
 

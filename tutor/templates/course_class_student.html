@@ -15,7 +15,7 @@
             {% for row in scc %}
                 <tr>
                     <td>{{ row.cc.title }}</td>
-                    <td align="center"><a href="{#{{ url_for('open_class_subject', title=row.title) }}#}"> Responder </a></td>
+                    <td align="center"><a href="{{ url_for('open_answer_questions', cc_title=row.cc.title, user=session.username) }}"> Responder </a></td>
                     <td align="center"><a href="{# {{ url_for('open_class_subject', title=row.title) }} #}"> Trancar a Matrícula </a></td>
                 </tr>
             {% endfor %}

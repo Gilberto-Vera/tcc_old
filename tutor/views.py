@@ -330,6 +330,46 @@ def open_edit_questions(question_id, cs_title, cc_title):
     )
 
 
+@app.route('/open_answer_questions/<cc_title>/<user>')
+def open_answer_questions(cc_title, user):
+    check_if_student()
+
+    question = Question().get_current_question(cc_title, user).evaluate()
+    cs_title = ClassSubject().get_class_subject_current_question(cc_title, user).evaluate()
+
+    return render_template(
+        'answer_question.html',
+        cc=cc_title,
+        cs=cs_title,
+        q=question,
+        username=user
+    )
+
+
+@app.route('/answer_question', methods=['GET', 'POST'])
+def answer_question():
+    check_if_student()
+
+    if request.method == 'POST':
+        cs = request.form['cs']
+        cc = request.form['cc']
+        right_answer = request.form['right_answer']
+        alternative_answered = request.form['alternative_answered']
+
+    if alternative_answered == right_answer:
+        flash('Acertou miseravi')
+    else:
+        flash('Eroooouuuuu...', category='error')
+
+    return render_template(
+        'alert_question_answered.html',
+        cs=cs,
+        cc=cc,
+        q=right_answer,
+        alternative_answered=alternative_answered
+    )
+
+
 @app.route('/open_questions/<cs_title>/<cc_title>')
 def open_questions(cs_title, cc_title):
     check_if_teacher()
