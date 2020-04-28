@@ -11,7 +11,7 @@ class Person:
         self.username = username
 
     def find(self):
-        user = matcher.match("Person", username__exact=self.username).first()
+        user = matcher.match("Person", username=self.username).first()
         return user
 
     def register(self, name, password, p_type):
@@ -62,7 +62,7 @@ class Person:
 
     def like_post(self, post_id):
         user = self.find()
-        post = matcher.match('Post', id__exact=post_id).first()
+        post = matcher.match('Post', id=post_id).first()
         graph.merge(Relationship(user, 'LIKED', post))
 
     def get_recent_posts(self):
@@ -121,7 +121,7 @@ class CourseClass:
             return False
 
     def find(self, title):
-        cc = matcher.match("CourseClass", title__exact=title).first()
+        cc = matcher.match("CourseClass", title=title).first()
         return cc
 
     def create(self, title):
@@ -147,7 +147,7 @@ class CourseClass:
 
     def delete(self, title):
         if self.find(title):
-            cc = matcher.match("CourseClass", title__exact=title).first()
+            cc = matcher.match("CourseClass", title=title).first()
             graph.delete(cc)
             return True
         else:
@@ -155,7 +155,7 @@ class CourseClass:
 
     def get_student_course_classes(self, user):
         query = '''
-                MATCH (p:Person {username: {user}})-->()-->()-->()-->(cc:CourseClass)
+                MATCH (p:Person {username: $user})-->()-->()-->()-->(cc:CourseClass)
                 RETURN cc
                 '''
         scc = list(graph.run(query, user=user))
@@ -433,7 +433,7 @@ class Question:
 
     # Retorna uma questão através do id (NÃO ESTA SENDO USADO)
     def find(self, id):
-        question = matcher.match("Question", id__exact=id).first()
+        question = matcher.match("Question", id=id).first()
         return question
 
     # Cria uma questão
@@ -525,7 +525,7 @@ class Question:
     # Exclui uma questão
     def delete(self, id):
         if self.find(id):
-            question = matcher.match("Question", id__exact=id).first()
+            question = matcher.match("Question", id=id).first()
             graph.delete(question)
             return True
         else:
