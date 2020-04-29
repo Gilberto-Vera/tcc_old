@@ -68,7 +68,7 @@ class Person:
     def get_recent_posts(self):
         query = '''
         MATCH (user:User)-[:PUBLISHED]->(post:Post)<-[:TAGGED]-(tag:Tag)
-        WHERE user.username = {username}
+        WHERE user.username = $username
         RETURN post, COLLECT(tag.name) AS tags
         ORDER BY post.timestamp DESC LIMIT 5
         '''
@@ -80,7 +80,7 @@ class Person:
         query = '''
         MATCH (you:User)-[:PUBLISHED]->(:Post)<-[:TAGGED]-(tag:Tag),
               (they:User)-[:PUBLISHED]->(:Post)<-[:TAGGED]-(tag)
-        WHERE you.username = {username} AND you <> they
+        WHERE you.username = $username AND you <> they
         WITH they, COLLECT(DISTINCT tag.name) AS tags
         ORDER BY SIZE(tags) DESC LIMIT 3
         RETURN they.username AS similar_user, tags
@@ -136,8 +136,8 @@ class CourseClass:
 
         if not self.find(title):
             query = '''
-                        MATCH (cc:CourseClass {title: {cc}})
-                        SET cc.title = {title}
+                        MATCH (cc:CourseClass {title: $cc})
+                        SET cc.title = $title
                         RETURN cc
                         '''
             graph.run(query, title=title, cc=cc)
@@ -163,7 +163,7 @@ class CourseClass:
 
     def get_no_student_course_classes(self, user):
         query = '''
-                MATCH (p:Person {username: {user}})
+                MATCH (p:Person {username: $user})
                 OPTIONAL MATCH (cc:CourseClass)
                 WHERE NOT (p)-->()-->()-->()-->(cc)
                 RETURN cc
@@ -178,11 +178,11 @@ class CourseClass:
     # método que verifica se a disciplina não tem nenhum relacionamento com outro assunto
     def find_single_course_class(self, cc):
         query = '''
-                 MATCH (cc:CourseClass {title: {cc}})
+                 MATCH (cc:CourseClass {title: $cc})
                  WHERE NOT (cc:CourseClass)<-->(:ClassSubject)
                  RETURN cc
                  '''
-        cc = graph.evaluate(query, cc=cc)
+        cc = graph.ClassSubjectevaluate(query, cc=cc)
         return cc
 
 
@@ -191,8 +191,8 @@ class ClassSubject:
 # método que retorna a quantidade de nós ClassSubject
     def find_node_count(self, cc, title):
         query = '''
-                    MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject)
-                    OPTIONAL MATCH (cs)<-->(cs {title: {title}})
+                    MATCH (cc:CourseClass {title: $cc})<-->(cs:ClassSubject)
+                    OPTIONAL MATCH (cs)<-->(cs {title: $title})
                     RETURN count(cs)
                 '''
         count = graph.evaluate(query, cc=cc, title=title)
@@ -201,7 +201,7 @@ class ClassSubject:
     def find_in_course(self, cc, title):
         query = '''
                    MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-                   WHERE cc.title = {cc} AND cs.title = {title}
+                   WHERE cc.title = $cc AND cs.title = $title
                    RETURN cs
                    ORDER BY cs.order
                    '''
@@ -210,8 +210,8 @@ class ClassSubject:
 
     def get_class_subject_current_question(self, cc_title, user):
         query = '''
-                MATCH (p:Person)-->(a:Answer)-->()-->(cs:ClassSubject)-->(cc:CourseClass {title: {cc_title}})
-                WHERE a.question_answered = "" AND p.username = {user}
+                MATCH (p:Person)-->(a:Answer)-->()-->(cs:ClassSubject)-->(cc:CourseClass {title: $cc_title})
+                WHERE a.question_answered = "" AND p.username = $user
                 RETURN cs
                '''
         cs = graph.run(query, cc_title=cc_title, user=user)
@@ -221,7 +221,7 @@ class ClassSubject:
     def get_initial_value(self, title, cc):
         query = '''
                    MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-                   WHERE cc.title = {cc} AND cs.title = {title}
+                   WHERE cc.title = $cc AND cs.title = $title
                    RETURN cs.initial
                    '''
         return graph.evaluate(query, title=title, cc=cc)
@@ -229,7 +229,7 @@ class ClassSubject:
 # Retorna o valor do campo 'initial' de um Assunto específco através do título da Disciplina e do título do Assunto
     def get_initial_id(self, cc_title):
         query = '''
-                   MATCH (cc:CourseClass {title: {cc}})<-[:TAUGHT]-(cs:ClassSubject)
+                   MATCH (cc:CourseClass {title: $cc})<-[:TAUGHT]-(cs:ClassSubject)
                    WHERE cs.initial = "True"
                    RETURN id(cs)
                    '''
@@ -237,7 +237,7 @@ class ClassSubject:
 
     def get_initial(self, title, cc):
         query = '''
-                   MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject {title: {title}})
+                   MATCH (cc:CourseClass {title: $cc})<-->(cs:ClassSubject {title: $title})
                    WHERE NOT cs.initial = "True"
                    RETURN cs
                    '''
@@ -245,19 +245,19 @@ class ClassSubject:
         return cs
 
     def find_previous(self, title, cc):
-        query = '''match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:PREVIOUS]->(
+        query = '''match (cc:CourseClass {title:$cc})<-[:TAUGHT]-(cs:ClassSubject {title:$title})-[:PREVIOUS]->(
         c:ClassSubject) return c.title '''
         return graph.evaluate(query, title=title, cc=cc)
 
     def find_next(self, title, cc):
-        query = '''match (cc:CourseClass {title:{cc}})<-[:TAUGHT]-(cs:ClassSubject {title:{title}})-[:FORWARD]->(
+        query = '''match (cc:CourseClass {title:$cc})<-[:TAUGHT]-(cs:ClassSubject {title:$title})-[:FORWARD]->(
         c:ClassSubject) return c.title '''
         return graph.evaluate(query, title=title, cc=cc)
 
 # Retorna o nó de um Assunto através do título do Assunto e do título da Disciplina
     def find_single_class_subject(self, title, cc_title):
         query = '''
-                 MATCH (cc:CourseClass {title: {cc}})<-->(cs:ClassSubject {title: {title}})
+                 MATCH (cc:CourseClass {title: $cc})<-->(cs:ClassSubject {title: $title})
                  WHERE NOT (cs)<-->(:Question)
                  RETURN cs
                  '''
@@ -294,10 +294,10 @@ class ClassSubject:
 
     def edit(self, st, title, cc, ps, ns, sm, cb):
         query = '''
-                    MATCH (cc:CourseClass {title: {cc}})
-                    OPTIONAL MATCH (cs:ClassSubject {title:{title}})
+                    MATCH (cc:CourseClass {title: $cc})
+                    OPTIONAL MATCH (cs:ClassSubject {title:$title})
                     WHERE (cc)<-->(cs)
-                    SET cs.title = {st}, cs.support_material = {sm}, cs.initial = {cb}
+                    SET cs.title = $st, cs.support_material = $sm, cs.initial = $cb
                     '''
 
         if cb == "False" and cb != self.get_initial_value(title, cc) and \
@@ -333,7 +333,7 @@ class ClassSubject:
 
     def delete_previous_course_class(self, cc, title):
         query = '''
-                MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
+                MATCH (cs:ClassSubject {title: $title})-[:TAUGHT]->(cc:CourseClass {title: $cc})
                 OPTIONAL MATCH (cs)-[r:PREVIOUS]->(ps:ClassSubject)
                 DELETE r
                 '''
@@ -341,7 +341,7 @@ class ClassSubject:
 
     def delete_forward_course_class(self, cc, title):
         query = '''
-                MATCH (cs:ClassSubject {title: {title}})-[:TAUGHT]->(cc:CourseClass {title: {cc}})
+                MATCH (cs:ClassSubject {title: $title})-[:TAUGHT]->(cc:CourseClass {title: $cc})
                 OPTIONAL MATCH (cs)-[r:FORWARD]->(ps:ClassSubject)
                 DELETE r
                 '''
@@ -350,7 +350,7 @@ class ClassSubject:
     def create_relationship_course_class_previous(self, cc, title, ps):
         query = '''
                 MATCH (cc:CourseClass)<-->(cs:ClassSubject), (cc:CourseClass)<-->(cs1:ClassSubject)
-                WHERE (cc.title = {cc}) AND (cs.title = {title}) AND (cs1.title = {ps})
+                WHERE (cc.title = $cc) AND (cs.title = $title) AND (cs1.title = $ps)
                 CREATE (cs)-[r:PREVIOUS]->(cs1)
                 '''
         graph.run(query, cc=cc, title=title, ps=ps)
@@ -358,7 +358,7 @@ class ClassSubject:
     def create_relationship_course_class_forward(self, cc, title, ns):
         query = '''
                 MATCH (cc:CourseClass)<-->(cs:ClassSubject), (cc:CourseClass)<-->(cs1:ClassSubject)
-                WHERE (cc.title = {cc}) AND (cs.title = {title}) AND (cs1.title = {ns})
+                WHERE (cc.title = $cc) AND (cs.title = $title) AND (cs1.title = $ns)
                 CREATE (cs)-[r:FORWARD]->(cs1)
                 '''
         graph.run(query, cc=cc, title=title, ns=ns)
@@ -366,7 +366,7 @@ class ClassSubject:
     def set_class_subject_False(self, cc):
         query = '''
                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-                WHERE cc.title = {cc} AND cs.initial = "True"
+                WHERE cc.title = $cc AND cs.initial = "True"
                 SET cs.initial = "False"
                 '''
         graph.run(query, cc=cc)
@@ -374,7 +374,7 @@ class ClassSubject:
     def get_class_subjects(self, title):
         query = '''
                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-                WHERE cc.title = {title}
+                WHERE cc.title = $title
                 RETURN cs
                 '''
 
@@ -384,7 +384,7 @@ class ClassSubject:
     def get_class_subjects_and_course_class(self, title):
         query = '''
                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-                WHERE cc.title = {title}
+                WHERE cc.title = $title
                 RETURN cs, cc
                 '''
 
@@ -394,17 +394,16 @@ class ClassSubject:
     # Retorna o id do Assunto initial da Disciplina
     def get_id_class_subjects(self, cc_title):
         query = '''
-                MATCH (cc:CourseClass)<--(cs:ClassSubject {title: 'cc_title'})
+                MATCH (cc:CourseClass)<--(cs:ClassSubject {title: $title})
                 RETURN id(cs)
                 '''
-
 
         cs_id = graph.run(query, title=cc_title)
         return cs_id
 
     def get_class_subjects_with_previous_and_forward(self, title):
         query = '''
-                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass {title: {title}})
+                 MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass {title: $title})
                  OPTIONAL MATCH (cs)-[:FORWARD]->(ns:ClassSubject)
                  OPTIONAL MATCH (cs)-[:PREVIOUS]->(ps:ClassSubject)
                  RETURN cs,  ns.title as ns_title, ps.title as ps_title
@@ -419,7 +418,7 @@ class ClassSubject:
         if self.find_in_course(title, cc):
             query = '''
                        MATCH (cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-                       WHERE cc.title = {cc} AND cs.title = {title}
+                       WHERE cc.title = $cc AND cs.title = $title
                        RETURN cs
                        '''
             cs = graph.evaluate(query, cc=cc, title=title)
@@ -467,10 +466,10 @@ class Question:
     def edit(self, question_id, title, body, support_material, difficulty, choice_a, choice_b, choice_c,
              choice_d, right_answer):
         query = '''
-                MATCH (q:Question {id: {question_id}})
-                SET q.title = {title}, q.body = {body}, q.support_material = {support_material}, q.difficulty = 
-                {difficulty}, q.choice_a = {choice_a}, q.choice_b = {choice_b}, q.choice_c = {choice_c}, q.choice_d =
-                {choice_d}, q.right_answer = {right_answer}
+                MATCH (q:Question {id: $question_id})
+                SET q.title = $title, q.body = $body, q.support_material = $support_material, q.difficulty = 
+                $difficulty, q.choice_a = $choice_a, q.choice_b = $choice_b, q.choice_c = $choice_c, q.choice_d =
+                $choice_d, q.right_answer = $right_answer
                 '''
         graph.run(query, question_id=question_id, title=title, body=body, support_material=support_material,
                   difficulty=difficulty, choice_a=choice_a, choice_b=choice_b, choice_c=choice_c, choice_d=choice_d,
@@ -481,7 +480,7 @@ class Question:
     def get_questions(self, cs_title, cc_title):
         query = '''
             MATCH (q:Question)-[:ASKED]->(cs:ClassSubject)-[:TAUGHT]->(cc:CourseClass)
-            WHERE cs.title = {cs_title} and cc.title = {cc_title}
+            WHERE cs.title = $cs_title and cc.title = $cc_title
             RETURN q
             ORDER BY q.title
             '''
@@ -491,10 +490,10 @@ class Question:
     # Retorna uma questão através do id
     def get_question(self, question_id):
         query = '''
-            MATCH (q:Question {id: {question_id}})
+            MATCH (q:Question {id: $question_id})
             RETURN q
             '''
-        question = graph.run(query, question=question_id)
+        question = graph.run(query, question_id=question_id)
         return question
 
     # Retorna uma questão aleatória de um Assunto específico
@@ -503,7 +502,7 @@ class Question:
 
         query = '''
                 MATCH (cs:ClassSubject)<-[:ASKED]-(q:Question)
-                WHERE id(cs) = {cs_id}
+                WHERE id(cs) = $cs_id
                 WITH q, rand() as rand
                 ORDER BY rand LIMIT 1
                 RETURN id(q)
@@ -515,8 +514,8 @@ class Question:
     def get_current_question(self, cc_title, user):
 
         query = '''
-                MATCH (p:Person)-->(a:Answer)-->(q:Question)-->()-->(cc:CourseClass {title: {cc_title}})
-                WHERE a.question_answered = "" AND p.username = {user}
+                MATCH (p:Person)-->(a:Answer)-->(q:Question)-->()-->(cc:CourseClass {title: $cc_title})
+                WHERE a.question_answered = "" AND p.username = $user
                 RETURN q
             '''
         question = graph.run(query, cc_title=cc_title, user=user)
@@ -535,7 +534,7 @@ class Question:
 def get_todays_recent_posts():
     query = '''
         MATCH (user:Person)-[:PUBLISHED]->(post:Post)<-[:TAGGED]-(tag:Tag)
-        WHERE post.date = {today}
+        WHERE post.date = $today
         RETURN user.username AS username, post, COLLECT(tag.name) AS tags
         ORDER BY post.timestamp DESC LIMIT 5
         '''
