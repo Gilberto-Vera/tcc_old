@@ -6,7 +6,7 @@
 <h3>Tutor Utilizando Base de Dados em Grafo</h3>
 <div class="metanav">
     {% if session.username %}
-        <p id="initial" class="session"> Olá {{ session.person_name }}... </p>
+        <p id="initial" class="session"> Olá {{ session.person_name }} </p>
     {% endif %}
     <p class="session" ><a href="{{ url_for('index') }}">Página Inicial</a></p>
     {% if not session.username %}
@@ -14,7 +14,7 @@
         <a href="{{ url_for('login') }}">Entrar</a>
     {% else %}
         {% if session.type == 'teacher' %}
-            <a href="{{ url_for('open_course_class') }}" class="session" >Disciplina</a>
+            <a href="{{ url_for('open_course_class', user=session.username) }}" class="session" >Disciplina</a>
         {% else %}
             <a href="{{ url_for('open_course_class_student', user=session.username) }}" class="session" >Disciplina</a>
         {% endif %}

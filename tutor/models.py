@@ -92,8 +92,8 @@ class Person:
         # Find how many of the logged-in user's posts the other user
         # has liked and which tags they've both blogged about.
         query = '''
-        MATCH (they:User {username: {they} })
-        MATCH (you:User {username: {you} })
+        MATCH (they:User {username: $they })
+        MATCH (you:User {username: $you })
         OPTIONAL MATCH (they)-[:PUBLISHED]->(:Post)<-[:TAGGED]-(tag:Tag),
                        (you)-[:PUBLISHED]->(:Post)<-[:TAGGED]-(tag)
         RETURN SIZE((they)-[:LIKED]->(:Post)<-[:PUBLISHED]-(you)) AS likes,
@@ -124,10 +124,12 @@ class CourseClass:
         cc = matcher.match("CourseClass", title=title).first()
         return cc
 
-    def create(self, title):
+    def create(self, title, username):
         if not self.find(title):
+            user = Person(username).find()
             cc = Node("CourseClass", title=title)
             graph.create(cc)
+            graph.merge(Relationship(cc, 'CREATED', user))
             return True
         else:
             return False
@@ -171,8 +173,14 @@ class CourseClass:
         nscc = list(graph.run(query, user=user))
         return nscc
 
-    def get_course_classes(self):
-        cc = matcher.match("CourseClass").order_by("_.title")
+    def get_course_classes(self, user):
+        query = '''
+            MATCH (cc:CourseClass)<--(p:Person)
+            WHERE p.username = $user
+            RETURN cc
+            ORDER BY cc.title
+        '''
+        cc = graph.run(query, user=user)
         return cc
 
     # método que verifica se a disciplina não tem nenhum relacionamento com outro assunto
@@ -182,7 +190,7 @@ class CourseClass:
                  WHERE NOT (cc:CourseClass)<-->(:ClassSubject)
                  RETURN cc
                  '''
-        cc = graph.ClassSubjectevaluate(query, cc=cc)
+        cc = graph.run(query, cc=cc).evaluate()
         return cc
 
 
@@ -459,7 +467,7 @@ class Question:
 
         graph.merge(Relationship(question, 'ASKED', cs))
 
-        graph.merge(Relationship(u, 'CREATED', question))
+        # graph.merge(Relationship(u, 'CREATED', question))
         return True
 
     # Edita uma questão através do id

@@ -9,8 +9,8 @@
             <dd><input type="text" size="30" name="title" value="{{ cc }}" required></dd>
         </dl>
         <input type="hidden" name="cc" value="{{ cc }}">
-        <input type="submit" class="button" formaction="{{ url_for('edit_course_class') }}" formmethod="post" value="Alterar">
-        <input type="submit" class="button" formaction="{{ url_for('open_course_class') }}" id="cancel" value="Cancelar">
+        <input type="submit" class="button" formaction="{{ url_for('edit_course_class', user=session.username) }}" formmethod="post" value="Alterar">
+        <input type="submit" class="button" formaction="{{ url_for('open_course_class', user=session.username) }}" id="cancel" value="Cancelar">
     </form>
 
     {% endif %}

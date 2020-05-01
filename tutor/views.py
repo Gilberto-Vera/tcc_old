@@ -88,8 +88,8 @@ def enrollment_course_class(cc, user):
                             user=user))
 
 
-@app.route('/edit_course_class', methods=['GET', 'POST'])
-def edit_course_class():
+@app.route('/edit_course_class/<user>', methods=['GET', 'POST'])
+def edit_course_class(user):
     check_if_teacher()
 
     if request.method == 'POST':
@@ -101,8 +101,11 @@ def edit_course_class():
         else:
             flash('Disciplina alterada com sucesso.')
 
-    return redirect(url_for('open_course_class'))
-
+    course_classes = list(CourseClass().get_course_classes(user))
+    return render_template(
+        'course_class.html',
+        cc=course_classes
+    )
 
 @app.route('/open_edit_course_class/<title>')
 def open_edit_course_class(title):
@@ -114,11 +117,11 @@ def open_edit_course_class(title):
     )
 
 
-@app.route('/open_course_class')
-def open_course_class():
+@app.route('/open_course_class/<user>')
+def open_course_class(user):
     check_if_teacher()
 
-    course_classes = CourseClass().get_course_classes()
+    course_classes = list(CourseClass().get_course_classes(user))
     return render_template(
         'course_class.html',
         cc=course_classes
@@ -145,10 +148,11 @@ def create_course_class():
 
     if request.method == 'POST':
         title = request.form['title']
+        username = request.form['username']
 
         if len(title) < 1:
             flash('A Disciplina deve possuir pelo menos 1 caractere')
-        elif not CourseClass().create(title):
+        elif not CourseClass().create(title, username):
             flash('Disciplina já existente')
         else:
             flash('Disciplina criada com sucesso.')
@@ -173,7 +177,7 @@ def delete_course_class(title):
     check_if_teacher()
 
     if not CourseClass().find_single_course_class(title):
-        flash('Disciplina com relacionamento, não pode ser exluida.')
+        flash('Disciplina com relacionamento, não pode ser excluida.')
     else:
         CourseClass().delete(title)
         flash('Disciplina excluida com sucesso.')
@@ -370,7 +374,7 @@ def answer_question():
     )
 
 
-@app.route('/open_questions/<cs_title>/<cc_title>')
+@app.route('/open_questions/<cs_title>/<cc_title>', methods=['GET', 'POST'])
 def open_questions(cs_title, cc_title):
     check_if_teacher()
 

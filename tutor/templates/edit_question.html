@@ -41,7 +41,7 @@
             <input type="hidden" name="question_id" value="{{ q.id }}" />
         </dl>
         <input type="submit" class="button" formaction="{{ url_for('edit_question', question_id=q.id, cs=cs, cc=cc) }}" formmethod="post" value="Salvar">
-        <input type="submit" class="button" formaction="{{ url_for('open_questions', cs_title=cs, cc_title=cc) }}" id="cancel" value="Voltar">
+        <input type="submit" class="button" formaction="{{ url_for('open_questions', cs_title=cs, cc_title=cc) }}" formmethod="post" id="cancel" value="Voltar">
     </form>
 
     {% endif %}
