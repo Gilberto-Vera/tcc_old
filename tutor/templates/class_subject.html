@@ -30,7 +30,7 @@
             <input type="hidden" name="cc" value="{{ cc }}" />
         </dl>
         <input type="submit" class="button" formaction="{{ url_for('create_class_subject') }}" formmethod="post" value="Criar Novo Assunto">
-        <input type="submit" class="button" formaction="{{ url_for('open_course_class') }}" id="cancel" value="Voltar">
+        <input type="submit" class="button" formaction="{{ url_for('open_course_class', user=session.username) }}" formmethod="post" id="cancel" value="Voltar">
     </form>
 
     {% include 'display_class_subjects.html' %}

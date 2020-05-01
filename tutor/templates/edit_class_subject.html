@@ -34,7 +34,7 @@
         <input type="radio" class="ini" name="checkbox_initial" value="True" {{ "checked" if initial == "True"}}> Sim
         <input type="radio" class="ini" name="checkbox_initial" value="False" {{ "checked" if initial == "False"}}> Não <br> <br>
         <input type="submit" class="button" formaction="{{ url_for('edit_class_subject') }}" formmethod="post" value="Salvar">
-        <input type="submit" class="button" formaction="{{ url_for('open_class_subject', title=cc) }}" id="cancel" value="Cancelar">
+        <input type="submit" class="button" formaction="{{ url_for('open_class_subject', title=cc) }}" formmethod="post" id="cancel" value="Cancelar">
     </form>
 
     {% endif %}

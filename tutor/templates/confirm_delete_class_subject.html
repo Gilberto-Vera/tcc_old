@@ -4,8 +4,8 @@
     {% if session.username %}
     <h2>Confirmar exclusão</h2>
     <form>
-        <input type="submit" class="button" formaction="{{ url_for('delete_class_subject', cs_title=cs, cc_title=cc) }}" value="Sim">
-        <input type="submit" class="button" formaction="{{ url_for('open_class_subject', title=cc) }}" id="cancel" value="Não">
+        <input type="submit" class="button" formaction="{{ url_for('delete_class_subject', cs_title=cs, cc_title=cc) }}" formmethod="post" value="Sim">
+        <input type="submit" class="button" formaction="{{ url_for('open_class_subject', title=cc) }}" formmethod="post" id="cancel" value="Não">
         <input type="hidden" value="{{ cs }}">
         <input type="hidden" value="{{ cc }}">
     </form>

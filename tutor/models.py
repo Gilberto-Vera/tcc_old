@@ -134,15 +134,14 @@ class CourseClass:
         else:
             return False
 
-    def edit(self, title, cc):
-
+    def edit(self, title, cc, user):
         if not self.find(title):
             query = '''
-                        MATCH (cc:CourseClass {title: $cc})
+                        MATCH (cc:CourseClass {title: $cc})<--(p:Person {username: $user})
                         SET cc.title = $title
                         RETURN cc
                         '''
-            graph.run(query, title=title, cc=cc)
+            graph.run(query, title=title, cc=cc, user=user)
             return True
         else:
             return False
@@ -159,6 +158,7 @@ class CourseClass:
         query = '''
                 MATCH (p:Person {username: $user})-->()-->()-->()-->(cc:CourseClass)
                 RETURN cc
+                ORDER BY cc.title
                 '''
         scc = list(graph.run(query, user=user))
         return scc
@@ -169,6 +169,7 @@ class CourseClass:
                 OPTIONAL MATCH (cc:CourseClass)
                 WHERE NOT (p)-->()-->()-->()-->(cc)
                 RETURN cc
+                ORDER BY cc.title
                 '''
         nscc = list(graph.run(query, user=user))
         return nscc

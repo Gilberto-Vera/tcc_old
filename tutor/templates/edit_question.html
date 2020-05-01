@@ -2,7 +2,7 @@
 {% block body %}
 
     {% if session.username %}
-    <h2>Questão do assunto {{ cs }}</h2>
+    <h2>Questão de {{ cs }}</h2>
     <form>
 {# Formulário para criar uma questão #}
         <dl>
@@ -22,7 +22,6 @@
                 <dd><textarea name="choice_d" cols="67" rows="1">{{  q.choice_d if q.choice_d != None  }}</textarea></dd>
             <dt>Nível de Dificuldade:</dt>
             <dd>
-                <p class="orientation">(de 1-fácil até 10-difícil)</p>
                 <select name="difficulty">
                     <option value="1" {{ "selected" if q.difficulty == "1" }}>1</option>
                     <option value="2" {{ "selected" if q.difficulty == "2" }}>2</option>

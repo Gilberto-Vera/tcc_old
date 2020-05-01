@@ -94,9 +94,9 @@ def edit_course_class(user):
 
     if request.method == 'POST':
         cc = request.form['cc']
-        title = request.form['title']
+        title = request.form['new_title']
 
-        if not CourseClass().edit(title, cc):
+        if not CourseClass().edit(title, cc, user):
             flash('Erro ao alterar Disciplina')
         else:
             flash('Disciplina alterada com sucesso.')
@@ -117,7 +117,7 @@ def open_edit_course_class(title):
     )
 
 
-@app.route('/open_course_class/<user>')
+@app.route('/open_course_class/<user>', methods=['GET', 'POST'])
 def open_course_class(user):
     check_if_teacher()
 
@@ -172,18 +172,21 @@ def confirm_delete_course_class(title):
     )
 
 
-@app.route('/delete_course_class/<title>')
-def delete_course_class(title):
+@app.route('/delete_course_class/<title>/<user>', methods=['GET', 'POST'])
+def delete_course_class(title, user):
     check_if_teacher()
 
     if not CourseClass().find_single_course_class(title):
-        flash('Disciplina com relacionamento, não pode ser excluida.')
+        flash('A Disciplina contém assunto, não pode ser excluida.')
     else:
         CourseClass().delete(title)
         flash('Disciplina excluida com sucesso.')
 
-    return redirect(url_for('open_course_class'))
-
+    course_classes = list(CourseClass().get_course_classes(user))
+    return render_template(
+        'course_class.html',
+        cc=course_classes
+    )
 
 # CLASS SUBJECT #
 @app.route('/edit_class_subject/', methods=['GET', 'POST'])
@@ -231,7 +234,7 @@ def open_edit_class_subject(title, cc):
     )
 
 
-@app.route('/open_class_subject/<title>')
+@app.route('/open_class_subject/<title>', methods=['GET', 'POST'])
 def open_class_subject(title):
     check_if_teacher()
 
@@ -257,7 +260,7 @@ def confirm_delete_class_subject(cs_title, cc_title):
     )
 
 
-@app.route('/delete_class_subject/<cs_title>/<cc_title>')
+@app.route('/delete_class_subject/<cs_title>/<cc_title>', methods=['GET', 'POST'])
 def delete_class_subject(cs_title, cc_title):
     check_if_teacher()
 
