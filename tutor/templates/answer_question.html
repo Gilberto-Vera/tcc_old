@@ -7,7 +7,7 @@
         <dl>
             <dt>Título:</dt>
             <dd><input type="text" size="30" value="{{ q.title }}" disabled></dd>
-            <dt>Material de Apoio:</dt>
+            <dt>Material de Apoio: </dt>
             <dd><textarea cols="67" rows="3" disabled>{{  q.support_material if q.support_material != None  }}</textarea></dd>
             <dt>Enunciado:</dt>
             <dd><textarea cols="67" rows="3" disabled>{{  q.body if q.body != None  }}</textarea></dd>
@@ -20,17 +20,19 @@
             <dt>Alternativa D: </dt>
                 <dd><textarea cols="67" rows="2" disabled>{{  q.choice_d if q.choice_d != None  }}</textarea></dd>
             <dt>Escolha a alternativa correta:
-                <label>A</label><input type="radio" name="alternative_answered" value="a">
-                <label>  B</label><input type="radio" name="alternative_answered" value="b">
-                <label>  C</label><input type="radio" name="alternative_answered" value="c">
-                <label>  D</label><input type="radio" name="alternative_answered" value="d"></dt>
-            <input type="hidden" name="cs" value="{{ cs.title }}" />
-            <input type="hidden" name="cc" value="{{ cc }}" />
+                <label>A:</label><input type="radio" name="alternative_answered" value="a" required>
+                <label>B:</label><input type="radio" name="alternative_answered" value="b" required>
+                <label>C:</label><input type="radio" name="alternative_answered" value="c" required>
+                <label>D:</label><input type="radio" name="alternative_answered" value="d" required></dt>
+            <input type="hidden" name="cs_title" value="{{ cs.title }}" />
             <input type="hidden" name="right_answer" value="{{ q.right_answer }}" />
             <input type="hidden" name="username" value="{{ username }}" />
+            <input type="hidden" name="title" value="{{ q.title }}" />
+            <input type="hidden" name="support_material" value="{{ q.support_material }}" />
+            <input type="hidden" name="body" value="{{ q.body }}" />
+
         </dl>
-        <input type="submit" class="button" formaction="{{ url_for('answer_question') }}" formmethod="post" value="Salvar">
-        <input type="submit" class="button" formaction="{{ url_for('open_course_class_student', cc_title=cc, user=username) }}" id="cancel" value="Voltar">
+        <input type="submit" class="button" formaction="{{ url_for('answer_question') }}" formmethod="POST" value="Responder">
     </form>
 
     {% endif %}

@@ -519,6 +519,19 @@ class Question:
         id = graph.run(query, cs_id=cs_id_initial).evaluate()
         return matcher.get(id)
 
+    # TO DO
+    def get_second_random_question(self, cs_title):
+        query = '''
+                MATCH (cs:ClassSubject)<-[:ASKED]-(q:Question)
+                WHERE id(cs) = $cs_id
+                WITH q, rand() as rand
+                ORDER BY rand LIMIT 1
+                RETURN id(q)
+            '''
+        id = graph.run(query, cs_title=cs_title).evaluate()
+        return matcher.get(id)
+
+
     # Retorna a questão atual, não respondida, de uma Disciplina
     def get_current_question(self, cc_title, user):
 
@@ -538,6 +551,18 @@ class Question:
             return True
         else:
             return False
+
+
+class Answer:
+    def set_answer_question(self, alternative_answered, user):
+        query = '''
+            MATCH (p:Person {username:$user})-->(a:Answer)
+            WHERE a.question_answered = ''
+            SET a.question_answered = $alternative_answered
+        '''
+        graph.run(query, user=user, alternative_answered=alternative_answered)
+        return True
+
 
 # Funcões legadas
 def get_todays_recent_posts():

@@ -2,14 +2,13 @@
 {% block body %}
 
     {% if session.username %}
-    <h2>Resultado</h2>
+    <h2>Resultado da {{ title }}</h2>
+    <h3>{{ body }}</h3>
+    <h3>{{ support_material }}</h3>
     <form>
-        <input type="submit" class="button" formaction="{#{{ url_for('delete_question', id=id, cc=cc, cs=cs) }}#}" value="Sim">
-        <input type="submit" class="button" formaction="{#{{ url_for('open_questions', cs_title=cs, cc_title=cc) }}#}" id="cancel" value="Não">
-        <input type="hidden" value="{{ id }}">
-        <input type="hidden" name="cs" value="{{ cs }}" />
-        <input type="hidden" name="cc" value="{{ cc }}" />
-
+        <input type="submit" class="button" formaction="{#{{ url_for('delete_question', id=id, cc=cc, cs=cs) }}#}" value="Próxima questão">
+        <input type="submit" class="button" formaction="{#{{ url_for('open_questions', cs_title=cs, cc_title=cc) }}#}" id="cancel" value="Próximo assunto">
+        <input type="hidden" value="{{ cs_title }}">
     </form>
 
    {% endif %}

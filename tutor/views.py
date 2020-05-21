@@ -1,4 +1,4 @@
-from .models import Person, CourseClass, ClassSubject, Question, get_todays_recent_posts
+from .models import Person, CourseClass, ClassSubject, Question, Answer
 from flask import Flask, request, session, redirect, url_for, render_template, flash
 
 app = Flask(__name__)
@@ -358,22 +358,27 @@ def answer_question():
     check_if_student()
 
     if request.method == 'POST':
-        cs = request.form['cs']
-        cc = request.form['cc']
+        title = request.form['title']
+        body = request.form['body']
+        support_material = request.form['support_material']
         right_answer = request.form['right_answer']
+        cs_title = request.form['cs_title']
         alternative_answered = request.form['alternative_answered']
+        user = request.form['username']
+        Answer().set_answer_question(alternative_answered, user)
 
     if alternative_answered == right_answer:
         flash('Acertou miseravi')
     else:
-        flash('Eroooouuuuu...', category='error')
+        flash('Eroooouuuuu...')
 
     return render_template(
         'alert_question_answered.html',
-        cs=cs,
-        cc=cc,
-        q=right_answer,
-        alternative_answered=alternative_answered
+        cs_title=cs_title,
+        title=title,
+        body=body,
+        support_material=support_material,
+        username=user
     )
 
 
